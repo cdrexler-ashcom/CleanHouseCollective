@@ -70,6 +70,15 @@ export function Pricing() {
           your quote.
         </p>
 
+        {/* Deposit note */}
+        <div className="mx-auto mt-6 flex max-w-2xl items-center justify-center gap-2 rounded-full bg-emerald/10 px-5 py-3 text-center text-sm font-medium text-emerald dark:bg-white/10 dark:text-sage-light">
+          <Icon name="tag" className="h-4 w-4 flex-none" />
+          <span>
+            A {site.booking.deposit} deposit secures your booking (paid by direct
+            deposit — details provided when we confirm your quote).
+          </span>
+        </div>
+
         {/* How to get a quote */}
         <div className="mt-16">
           <h3 className="text-center font-display text-2xl font-bold">

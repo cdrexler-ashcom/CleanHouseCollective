@@ -76,7 +76,7 @@ export function Footer() {
           <p>
             &copy; {year} {site.name}. All rights reserved.
           </p>
-          <p>Come home to fresh, without the fuss.</p>
+          <p>ABN {site.abn}</p>
         </div>
       </div>
     </footer>

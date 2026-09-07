@@ -51,8 +51,9 @@ export function Hero() {
               Get a Free Quote
               <Icon name="arrowRight" className="h-4 w-4" />
             </button>
-            <a href="#services" className="btn-secondary">
-              Explore Services
+            <a href={site.contact.phoneHref} className="btn-secondary">
+              <Icon name="phone" className="h-4 w-4" />
+              {site.contact.phone}
             </a>
           </div>
 
@@ -79,14 +80,15 @@ export function Hero() {
 
         {/* Visual — brand logo feature card */}
         <div className="relative animate-scale-in">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sage-light/50 via-cream to-sage/30 p-1 shadow-soft-lg dark:from-emerald-light/30 dark:via-emerald-deep dark:to-emerald/20">
-            <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-[1.4rem] p-10">
+          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sage-light/50 via-cream to-sage/30 p-6 shadow-soft-lg sm:p-8 dark:from-emerald-light/30 dark:via-emerald-deep dark:to-emerald/20">
+            {/* Readable, softly-rounded cream panel holding the transparent logo */}
+            <div className="relative flex aspect-[4/5] items-center justify-center rounded-[1.6rem] bg-cream/90 p-8 shadow-soft ring-1 ring-black/5 backdrop-blur-sm sm:p-12">
               <Image
-                src="/logo.png"
+                src="/logo-transparent.png"
                 alt="Clean House Collective"
                 width={360}
-                height={360}
-                className="h-auto w-4/5 max-w-xs object-contain drop-shadow-sm"
+                height={280}
+                className="h-auto w-full max-w-[16rem] object-contain"
                 priority
               />
             </div>

@@ -145,8 +145,9 @@ export function QuoteModal({
       `Email: ${contact.email}\n` +
       `Phone: ${contact.phone}\n\n` +
       (photos.length
-        ? `(${photos.length} photo(s) selected — please attach them to this email.)\n`
-        : "");
+        ? `(${photos.length} photo(s) selected — please attach them to this email.)\n\n`
+        : "") +
+      `Note: A ${site.booking.deposit} deposit secures the booking (details to be provided on confirmation).\n`;
     const mailto = `mailto:${site.contact.email}?subject=${encodeURIComponent(
       `New Quote Request — ${answers.service || "Cleaning"}`
     )}&body=${encodeURIComponent(body)}`;
@@ -201,7 +202,7 @@ export function QuoteModal({
         {/* Body */}
         <div className="modal-scroll flex-1 overflow-y-auto px-6 py-8">
           {done ? (
-            <SuccessView onClose={onClose} email={site.contact.email} />
+            <SuccessView onClose={onClose} />
           ) : (
             <div key={step.id} className="animate-fade-in">
               <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-sage-dark dark:text-sage-light">
@@ -342,28 +343,43 @@ export function QuoteModal({
   );
 }
 
-function SuccessView({
-  onClose,
-  email,
-}: {
-  onClose: () => void;
-  email: string;
-}) {
+function SuccessView({ onClose }: { onClose: () => void }) {
   return (
-    <div className="flex flex-col items-center py-8 text-center">
+    <div className="flex flex-col items-center py-6 text-center">
       <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald text-cream">
         <Icon name="check" className="h-8 w-8" />
       </span>
       <h4 className="font-display text-2xl font-bold">Thanks — we&apos;re on it!</h4>
       <p className="mt-3 max-w-sm text-charcoal/70 dark:text-cream/70">
-        Your quote request has been sent to our team. We&apos;ll be in touch soon
-        with your personalised flat-rate quote. Keep an eye on your inbox — and
-        remember, new clients get $20 off their first Refresh!
+        Your quote request has been sent, and a confirmation is on its way to
+        your inbox. We&apos;ll be in touch soon with your personalised flat-rate
+        quote.
       </p>
-      <p className="mt-2 text-xs text-charcoal/50 dark:text-cream/50">
-        Prefer to reach us directly? {email}
+
+      {/* Deposit note */}
+      <div className="mt-6 w-full rounded-2xl border border-emerald/15 bg-emerald/5 p-5 text-left dark:border-white/10 dark:bg-white/5">
+        <div className="flex items-center gap-2">
+          <Icon
+            name="tag"
+            className="h-4 w-4 text-emerald dark:text-sage-light"
+          />
+          <p className="text-sm font-semibold text-emerald dark:text-sage-light">
+            Securing your booking
+          </p>
+        </div>
+        <p className="mt-2 text-sm text-charcoal/70 dark:text-cream/70">
+          A {site.booking.deposit} deposit (via direct deposit) secures your
+          booking. We&apos;ve emailed you the bank details — no need to pay until
+          we&apos;ve confirmed your quote. New clients also get{" "}
+          {site.offers.newClient}!
+        </p>
+      </div>
+
+      <p className="mt-4 text-xs text-charcoal/50 dark:text-cream/50">
+        Prefer to reach us directly? {site.contact.email} ·{" "}
+        {site.contact.phone}
       </p>
-      <button type="button" onClick={onClose} className="btn-primary mt-8">
+      <button type="button" onClick={onClose} className="btn-primary mt-6">
         Done
       </button>
     </div>

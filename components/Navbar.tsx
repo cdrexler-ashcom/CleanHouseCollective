@@ -5,6 +5,7 @@ import { Logo } from "./Logo";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 import { useQuote } from "./QuoteProvider";
+import { site } from "@/data/site";
 
 const navLinks = [
   { label: "About", href: "#about" },
@@ -55,6 +56,13 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <a
+            href={site.contact.phoneHref}
+            className="hidden items-center gap-2 text-sm font-semibold text-emerald transition-colors hover:text-emerald-light lg:inline-flex dark:text-sage-light dark:hover:text-sage"
+          >
+            <Icon name="phone" className="h-4 w-4" />
+            {site.contact.phone}
+          </a>
           <ThemeToggle />
           <button
             type="button"
@@ -90,6 +98,14 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
+            <a
+              href={site.contact.phoneHref}
+              onClick={() => setMenuOpen(false)}
+              className="mt-1 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-emerald transition-colors hover:bg-black/5 dark:text-sage-light dark:hover:bg-white/5"
+            >
+              <Icon name="phone" className="h-4 w-4" />
+              {site.contact.phone}
+            </a>
             <button
               type="button"
               onClick={() => {

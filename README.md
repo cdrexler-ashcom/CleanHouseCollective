@@ -19,8 +19,12 @@ Built with **Next.js 14 (App Router)**, **TypeScript** and **Tailwind CSS**.
 - **Multi-step quote questionnaire** — the primary lead-conversion feature
 - **📷 Photo upload _and_ live camera capture** in the quote form (optional now,
   ready to make mandatory later)
-- **Real email delivery** — quote requests (with photo attachments) are emailed
-  to the business inbox via a serverless API route
+- **Real email delivery (Resend)** — quote requests (with photo attachments) are
+  emailed to the business, and the customer gets an automatic confirmation
+- **💳 $30 booking deposit** — direct-deposit details are emailed to the customer
+  on submission and shown on the confirmation screen
+- **Business details** — phone `0499 930 422` and ABN `48 701 813 578` shown
+  where relevant
 - **SEO foundations** — metadata, Open Graph tags, semantic HTML
 - **Content-driven** — nearly all copy lives in one file (`data/site.ts`)
 
@@ -66,74 +70,57 @@ Limits (count and file size) are configured in `data/site.ts` under
 
 ---
 
-## ✉️ Sending emails to the business inbox
+## ✉️ Sending emails to the business inbox (Resend)
 
 Quote requests are emailed to **cleanhousecollective@outlook.com**. Because the
-form can include **photo attachments**, this needs a small server-side step
-(a plain `mailto:` link can't attach files). Three options, simplest first:
+form can include **photo attachments** and also sends the customer a
+confirmation, this uses a small serverless endpoint at **`app/api/quote/route.ts`**
+powered by [**Resend**](https://resend.com).
 
-### Option A — Serverless API route + SMTP (included, recommended)
+**Why Resend?** It delivers reliably from serverless hosts (Vercel/Netlify),
+has a generous free tier, native attachment support, and a simple API. The route
+calls Resend's REST API directly with `fetch`, so there's **no extra dependency**
+to install.
 
-This project ships with a working endpoint at **`app/api/quote/route.ts`** that
-uses [Nodemailer](https://nodemailer.com) to send the email with attachments.
+### What happens on submit
 
-1. Copy the env template and fill in real values:
+1. **The business** gets a full notification email (all answers + any photos
+   attached), with the customer set as `Reply-To`.
+2. **The customer** gets a friendly confirmation email that includes the **$30
+   deposit** direct-deposit details (configured in `data/site.ts → booking`).
+
+### One-time setup
+
+1. Create a free account at **[resend.com](https://resend.com)** and generate an
+   **API key**.
+2. Add & verify your sending domain (e.g. `cleanhousecollective.com.au`). For a
+   quick test with no domain, you can use Resend's shared sender
+   `onboarding@resend.dev` (it only delivers to the address you signed up with).
+3. Copy the env template and fill it in:
    ```bash
    cp .env.example .env.local
    ```
-2. For the Outlook inbox, use Outlook's SMTP server and an **app password**:
    ```env
-   SMTP_HOST=smtp-mail.outlook.com
-   SMTP_PORT=587
-   SMTP_USER=cleanhousecollective@outlook.com
-   SMTP_PASS=your-16-char-app-password
+   RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxx
+   QUOTE_FROM="Clean House Collective <quotes@cleanhousecollective.com.au>"
    QUOTE_TO=cleanhousecollective@outlook.com
-   QUOTE_FROM=cleanhousecollective@outlook.com
    ```
-   > Generate an app password at **account.microsoft.com → Security → Advanced
-   > security options → App passwords**. This requires two-step verification to
-   > be enabled. Never use the normal account password, and never commit
-   > `.env.local`.
-3. Run `npm run dev` and submit a test quote. The email (with any photos
-   attached) lands in the Outlook inbox. Replies go straight to the customer
-   (the customer's email is set as `Reply-To`).
+4. Run `npm run dev` and submit a test quote.
 
-**Deploying to Vercel:** add the same variables under **Project → Settings →
-Environment Variables**, then redeploy. No other change needed.
+**Deploying to Vercel:** add the same three variables under **Project → Settings
+→ Environment Variables**, then redeploy. Nothing else to change.
 
-> ⚠️ Microsoft is progressively retiring Basic Auth SMTP on some tenants. If
-> Outlook SMTP is blocked on the account, use Option B or C below — the
-> front-end code doesn't change, only the contents of `route.ts`.
+> If `RESEND_API_KEY` isn't set, the endpoint returns 503 and the front-end
+> gracefully falls back to opening the visitor's email client via `mailto:`
+> (note: `mailto:` can't carry photo attachments).
 
-### Option B — Transactional email service (most reliable at scale)
+### 💳 Booking deposit — update the bank details
 
-Swap the Nodemailer transport in `route.ts` for a provider like
-**[Resend](https://resend.com)**, **SendGrid**, or **Mailgun**. These deliver
-reliably from cloud hosts and support attachments. Example with Resend:
+The $30 deposit and its **direct-deposit bank details** live in
+`data/site.ts → site.booking`. The placeholders (`BSB 000-000`, account
+`0000 0000`) are emailed to the customer on submission, so **replace them with
+the real account details before going live**.
 
-```ts
-import { Resend } from "resend";
-const resend = new Resend(process.env.RESEND_API_KEY);
-await resend.emails.send({
-  from: "quotes@yourdomain.com.au",       // a verified domain you own
-  to: "cleanhousecollective@outlook.com", // delivered to the Outlook inbox
-  replyTo: data.email,
-  subject: `New Quote Request — ${data.service}`,
-  html,
-  attachments: attachments.map(a => ({ filename: a.filename, content: a.content })),
-});
-```
-
-### Option C — Zero-backend form service
-
-If you'd rather keep the site fully static (no API route/server), use a hosted
-form endpoint such as **[Web3Forms](https://web3forms.com)** (free) or
-**Formspree**. They accept `multipart/form-data` (including file attachments)
-and forward it to any inbox. In `QuoteModal.tsx`, change the `fetch("/api/quote")`
-URL to the provider's endpoint and add your access key. You can then re-enable
-`output: "export"` in `next.config.mjs` for a static build.
-
----
 
 ## 🛠️ Customising content
 
@@ -153,8 +140,10 @@ Almost everything lives in **`data/site.ts`**:
 | Quote questionnaire      | `quoteSteps[]`      |
 | Photo limits             | `photoLimits`       |
 
-> **Before launch:** replace the placeholder **phone number** in
-> `site.contact.phone` with the real one.
+> **Before launch:** replace the placeholder **deposit bank details** in
+> `site.booking.bank` (BSB & account number) with the real account information.
+> The business phone (`0499 930 422`) and **ABN** (`48 701 813 578`) are already
+> set in `site.contact` and `site.abn`.
 
 ### Branding
 
@@ -169,7 +158,7 @@ The logo is at `public/logo.png`.
 ```
 clean-house-collective/
 ├── app/
-│   ├── api/quote/route.ts   # ✉️ Email endpoint (Nodemailer + attachments)
+│   ├── api/quote/route.ts   # ✉️ Email endpoint (Resend: business + customer)
 │   ├── layout.tsx           # Fonts, metadata, theme script
 │   ├── page.tsx             # Home page — assembles all sections
 │   └── globals.css

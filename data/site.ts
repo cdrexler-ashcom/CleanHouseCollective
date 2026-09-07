@@ -15,10 +15,13 @@ export const site = {
   description:
     "Regular domestic house cleaning based in Kallangur, servicing homes within approximately a 30 km radius across North Brisbane & Moreton Bay. Simple, all-inclusive flat-rate pricing.",
 
+  // ---- Business / legal details ----
+  abn: "48 701 813 578", // ABN 48701813578, formatted XX XXX XXX XXX
+
   // ---- Contact details ----
   contact: {
-    phone: "0400 000 000", // TODO: replace with the real business number
-    phoneHref: "tel:+61400000000",
+    phone: "0499 930 422",
+    phoneHref: "tel:+61499930422",
     email: "cleanhousecollective@outlook.com",
     baseLocation: "Kallangur, QLD",
     serviceArea: "Kallangur & ~30 km radius",
@@ -28,6 +31,23 @@ export const site = {
   offers: {
     newClient: "$20 off your first Refresh",
     referral: "$20 off your next Refresh when you refer a friend",
+  },
+
+  // ---- Booking deposit ----
+  // A small deposit secures each booking. For now this is handled by direct
+  // deposit — the bank details below are emailed to the customer when we reply
+  // to their quote request. TODO: replace the placeholder bank details with the
+  // real account information.
+  booking: {
+    deposit: "$30",
+    depositBlurb:
+      "A $30 deposit secures your booking. Once we confirm your quote, we'll send our direct deposit details so you can lock in your spot.",
+    bank: {
+      accountName: "Clean House Collective",
+      bsb: "014-309", // TODO: real BSB
+      accountNumber: "8183 4387 8", // TODO: real account number
+      reference: "Clean House Collective Kallangur",
+    },
   },
 
   social: {
@@ -128,7 +148,7 @@ export const valueProps = [
   {
     icon: "check",
     title: "No surprises on cleaning day",
-    text: "You'll know your agreed service and flat-rate price before we arrive. Ever.",
+    text: "You'll know your agreed service and flat-rate price before we arrive. Every time.",
   },
 ];
 
@@ -430,6 +450,8 @@ export const quoteSteps: QuoteStep[] = [
   {
     id: "contact",
     question: "Where can we send your quote?",
+    helper:
+      "We'll reply with your personalised flat-rate quote. A $30 deposit (via direct deposit) secures your booking once you're ready — we'll include the details in our reply.",
     type: "contact",
   },
 ];

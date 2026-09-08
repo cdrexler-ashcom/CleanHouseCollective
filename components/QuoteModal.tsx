@@ -160,7 +160,7 @@ export function QuoteModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-[100] flex items-stretch justify-center p-0 sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Request a cleaning quote"
@@ -170,9 +170,14 @@ export function QuoteModal({
         onClick={onClose}
       />
 
-      <div className="relative flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-cream shadow-soft-lg animate-scale-in dark:bg-emerald-deep sm:rounded-3xl">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-black/5 px-6 py-5 dark:border-white/10">
+      {/* Panel: fullscreen on mobile (uses the entire screen), a centered card
+          on larger screens. */}
+      <div className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col overflow-hidden rounded-none bg-cream shadow-soft-lg animate-scale-in dark:bg-emerald-deep sm:h-auto sm:max-h-[92vh] sm:max-w-lg sm:rounded-3xl">
+        {/* Header (respects the top safe-area inset when fullscreen) */}
+        <div
+          className="flex items-center justify-between border-b border-black/5 px-6 py-5 dark:border-white/10"
+          style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.25rem)" }}
+        >
           <div>
             <p className="eyebrow">Free Quote</p>
             <h3 className="font-display text-xl font-bold">
@@ -303,9 +308,14 @@ export function QuoteModal({
           )}
         </div>
 
-        {/* Footer */}
+        {/* Footer (respects the bottom safe-area inset when fullscreen) */}
         {!done && (
-          <div className="flex items-center justify-between gap-3 border-t border-black/5 px-6 py-5 dark:border-white/10">
+          <div
+            className="flex items-center justify-between gap-3 border-t border-black/5 px-6 py-5 dark:border-white/10"
+            style={{
+              paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
+            }}
+          >
             <button
               type="button"
               onClick={goBack}

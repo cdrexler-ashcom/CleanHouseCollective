@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Icon } from "./Icon";
 import { photoLimits } from "@/data/site";
 
@@ -90,7 +91,7 @@ export function PhotoStep({
                 type="button"
                 onClick={() => removePhoto(photo.id)}
                 aria-label="Remove photo"
-                className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-charcoal/60 text-white opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100 focus:opacity-100"
+                className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-charcoal/60 text-white opacity-100 backdrop-blur-sm transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
               >
                 <Icon name="trash" className="h-3.5 w-3.5" />
               </button>
@@ -154,9 +155,18 @@ export function PhotoStep({
 }
 
 /**
- * Live camera capture overlay using the MediaDevices API.
- * Falls back gracefully (with a helpful message) if the browser blocks access
- * or no camera is available — the user can still upload from their device.
+ * Live camera capture — a TRUE fullscreen overlay.
+ *
+ * Rendered through a React portal to `document.body` so it escapes the quote
+ * modal's transform/overflow context. (The modal panel uses a CSS `transform`
+ * for its open animation; a `position: fixed` child inside a transformed
+ * ancestor is positioned relative to that ancestor and clipped by its
+ * `overflow-hidden` — which was hiding the shutter button. Portaling to
+ * <body> fixes this completely.)
+ *
+ * Layout is a flex column: top bar / video (flex-1) / bottom controls. The
+ * shutter is a normal flex child pinned within the safe-area inset, so it can
+ * never be pushed off-screen or hidden behind the mobile browser chrome.
  */
 function CameraCapture({
   onCapture,
@@ -169,10 +179,26 @@ function CameraCapture({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Only render the portal on the client (document must exist).
+  useEffect(() => setMounted(true), []);
+
+  // Lock background scroll while the camera is open.
   useEffect(() => {
+    if (!mounted) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [mounted]);
+
+  // Start the camera once the portal (and the <video>) is in the DOM.
+  useEffect(() => {
+    if (!mounted) return;
     let cancelled = false;
 
     async function start() {
@@ -188,7 +214,7 @@ function CameraCapture({
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          await videoRef.current.play();
+          await videoRef.current.play().catch(() => {});
           setReady(true);
         }
       } catch {
@@ -203,12 +229,22 @@ function CameraCapture({
     return () => {
       cancelled = true;
       streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
     };
-  }, []);
+  }, [mounted]);
+
+  // Close on Escape.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   function capture() {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !video.videoWidth) return;
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -229,18 +265,17 @@ function CameraCapture({
     );
   }
 
-  // Fullscreen camera overlay. Uses `100dvh` (dynamic viewport height) so the
-  // controls are never hidden behind the mobile browser toolbar, and pins the
-  // shutter to the bottom within the device safe-area inset.
-  return (
+  if (!mounted) return null;
+
+  const overlay = (
     <div
-      className="fixed inset-0 z-[120] h-[100dvh] overflow-hidden bg-black"
+      className="fixed inset-0 z-[200] flex h-[100dvh] flex-col bg-black"
       role="dialog"
       aria-modal="true"
       aria-label="Take a photo"
     >
       {error ? (
-        <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center text-white/85">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center text-white/85">
           <Icon name="camera" className="h-12 w-12 opacity-60" />
           <p className="max-w-xs text-sm">{error}</p>
           <button type="button" onClick={onClose} className="btn-primary mt-2">
@@ -249,19 +284,10 @@ function CameraCapture({
         </div>
       ) : (
         <>
-          {/* Live camera feed fills the screen */}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-
-          {/* Top bar: title + close */}
+          {/* Top bar */}
           <div
-            className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-4 pb-10 pt-4"
-            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
+            className="flex flex-none items-center justify-between px-4 pb-3"
+            style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
           >
             <span className="font-display text-lg font-bold text-white drop-shadow">
               Take a photo
@@ -270,24 +296,37 @@ function CameraCapture({
               type="button"
               onClick={onClose}
               aria-label="Close camera"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/25"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/25 active:scale-95"
             >
               <Icon name="close" className="h-5 w-5" />
             </button>
           </div>
 
-          {/* Bottom controls: shutter, always visible above the safe area */}
+          {/* Live camera feed fills the remaining space */}
+          <div className="relative min-h-0 flex-1 overflow-hidden bg-black">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            {!ready && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="text-sm text-white/80">Starting camera…</p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom controls — always visible, above the safe-area inset */}
           <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pt-12"
+            className="flex flex-none flex-col items-center gap-3 px-4 pt-4"
             style={{
-              paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)",
+              paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
             }}
           >
-            {!ready && (
-              <p className="text-sm text-white/80">Starting camera…</p>
-            )}
             {disabled ? (
-              <p className="rounded-full bg-black/40 px-4 py-2 text-center text-sm text-white/90">
+              <p className="rounded-full bg-white/10 px-4 py-2 text-center text-sm text-white/90">
                 Photo limit reached — close to review your photos.
               </p>
             ) : (
@@ -296,7 +335,7 @@ function CameraCapture({
                 onClick={capture}
                 disabled={!ready}
                 aria-label="Capture photo"
-                className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-white/25 ring-4 ring-white/50 backdrop-blur-sm transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-[4.5rem] w-[4.5rem] flex-none items-center justify-center rounded-full bg-white/25 ring-4 ring-white/60 backdrop-blur-sm transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <span className="h-14 w-14 rounded-full bg-white shadow-lg" />
               </button>
@@ -306,4 +345,6 @@ function CameraCapture({
       )}
     </div>
   );
+
+  return createPortal(overlay, document.body);
 }

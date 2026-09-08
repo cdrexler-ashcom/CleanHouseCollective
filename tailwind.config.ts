@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Extra-small breakpoint for fine-grained control on small phones.
+      screens: {
+        xs: "400px",
+      },
       colors: {
         // Clean House Collective brand palette (matches the logo)
         emerald: {

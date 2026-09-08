@@ -16,12 +16,16 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
+    /* Guard against any child element ever forcing a horizontal scrollbar,
+       which was allowing content (e.g. the Contact heading) to be clipped. */
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-cream text-charcoal antialiased;
     background-color: rgb(var(--background));
     color: rgb(var(--foreground));
+    overflow-x: hidden;
   }
 
   .dark body {

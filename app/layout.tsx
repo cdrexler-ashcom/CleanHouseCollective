@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { site } from "@/data/site";
@@ -39,6 +39,20 @@ export const metadata: Metadata = {
     locale: "en_AU",
   },
   robots: { index: true, follow: true },
+};
+
+// Locks the layout to the device width and disables pinch/tap zoom so text can
+// never be scaled past the edge of the screen. `viewportFit: "cover"` lets us
+// use the safe-area insets (notch / home indicator) in the camera modal.
+// Note: disabling user zoom is an accessibility trade-off; the layout is built
+// to be fully readable at the default scale on every device to compensate.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#0D4F45",
 };
 
 export default function RootLayout({

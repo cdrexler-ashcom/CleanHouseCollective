@@ -229,56 +229,81 @@ function CameraCapture({
     );
   }
 
+  // Fullscreen camera overlay. Uses `100dvh` (dynamic viewport height) so the
+  // controls are never hidden behind the mobile browser toolbar, and pins the
+  // shutter to the bottom within the device safe-area inset.
   return (
-    <div className="fixed inset-0 z-[110] flex flex-col bg-charcoal/90 p-4 backdrop-blur-sm">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
-        <div className="mb-3 flex items-center justify-between text-white">
-          <span className="font-display text-lg font-bold">Take a photo</span>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close camera"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15 hover:bg-white/25"
-          >
-            <Icon name="close" className="h-5 w-5" />
+    <div
+      className="fixed inset-0 z-[120] h-[100dvh] overflow-hidden bg-black"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Take a photo"
+    >
+      {error ? (
+        <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center text-white/85">
+          <Icon name="camera" className="h-12 w-12 opacity-60" />
+          <p className="max-w-xs text-sm">{error}</p>
+          <button type="button" onClick={onClose} className="btn-primary mt-2">
+            Close
           </button>
         </div>
+      ) : (
+        <>
+          {/* Live camera feed fills the screen */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="absolute inset-0 h-full w-full object-cover"
+          />
 
-        <div className="relative flex-1 overflow-hidden rounded-2xl bg-black">
-          {error ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-white/80">
-              <Icon name="camera" className="h-10 w-10 opacity-60" />
-              <p className="text-sm">{error}</p>
-            </div>
-          ) : (
-            <video
-              ref={videoRef}
-              playsInline
-              muted
-              className="h-full w-full object-cover"
-            />
-          )}
-        </div>
-
-        <div className="mt-4 flex items-center justify-center">
-          {!error && (
+          {/* Top bar: title + close */}
+          <div
+            className="absolute inset-x-0 top-0 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent px-4 pb-10 pt-4"
+            style={{ paddingTop: "calc(env(safe-area-inset-top) + 1rem)" }}
+          >
+            <span className="font-display text-lg font-bold text-white drop-shadow">
+              Take a photo
+            </span>
             <button
               type="button"
-              onClick={capture}
-              disabled={!ready || disabled}
-              className="btn-primary disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={onClose}
+              aria-label="Close camera"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-colors hover:bg-white/25"
             >
-              <Icon name="camera" className="h-4 w-4" />
-              Capture
+              <Icon name="close" className="h-5 w-5" />
             </button>
-          )}
-          {error && (
-            <button type="button" onClick={onClose} className="btn-primary">
-              Close
-            </button>
-          )}
-        </div>
-      </div>
+          </div>
+
+          {/* Bottom controls: shutter, always visible above the safe area */}
+          <div
+            className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-3 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pt-12"
+            style={{
+              paddingBottom: "calc(env(safe-area-inset-bottom) + 1.5rem)",
+            }}
+          >
+            {!ready && (
+              <p className="text-sm text-white/80">Starting camera…</p>
+            )}
+            {disabled ? (
+              <p className="rounded-full bg-black/40 px-4 py-2 text-center text-sm text-white/90">
+                Photo limit reached — close to review your photos.
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={capture}
+                disabled={!ready}
+                aria-label="Capture photo"
+                className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-white/25 ring-4 ring-white/50 backdrop-blur-sm transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <span className="h-14 w-14 rounded-full bg-white shadow-lg" />
+              </button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -31,8 +31,8 @@ export function Contact() {
   return (
     <section id="contact" className="section">
       <div className="container-page">
-        <div className="relative overflow-hidden rounded-3xl bg-emerald px-6 py-12 text-cream shadow-soft-lg sm:px-10 sm:py-14 lg:px-16 lg:py-20">
-          <div className="pointer-events-none absolute inset-0 opacity-30">
+        <div className="relative overflow-hidden rounded-3xl bg-emerald px-5 py-10 text-cream shadow-soft-lg sm:px-10 sm:py-14 lg:px-16 lg:py-20">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-30">
             <div className="absolute -top-16 right-10 h-64 w-64 rounded-full bg-sage-light/40 blur-3xl" />
             <div className="absolute bottom-0 -left-10 h-64 w-64 rounded-full bg-emerald-light/60 blur-3xl" />
           </div>
@@ -42,7 +42,7 @@ export function Contact() {
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sage-light">
                 Get in touch
               </p>
-              <h2 className="mt-3 font-display text-3xl font-bold sm:text-4xl">
+              <h2 className="mt-3 text-balance break-words font-display text-[1.75rem] font-bold leading-tight sm:text-4xl">
                 Ready for a fresher home?
               </h2>
               <p className="mt-5 max-w-md text-cream/80">

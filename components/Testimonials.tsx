@@ -1,4 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import { testimonials } from "@/data/site";
+import { Icon } from "./Icon";
+
+const PREVIEW_COUNT = 3;
 
 function Stars({ count }: { count: number }) {
   return (
@@ -12,7 +18,36 @@ function Stars({ count }: { count: number }) {
   );
 }
 
+function Review({
+  quote,
+  name,
+  service,
+  timeAgo,
+  rating,
+}: (typeof testimonials)[number]) {
+  return (
+    <figure className="card break-inside-avoid">
+      <Stars count={rating} />
+      <blockquote className="mt-4 text-charcoal/80 dark:text-cream/80">
+        &ldquo;{quote}&rdquo;
+      </blockquote>
+      <figcaption className="mt-5 border-t border-black/5 pt-4 dark:border-white/10">
+        <p className="font-semibold">{name}</p>
+        <p className="text-xs text-charcoal/60 dark:text-cream/60">
+          {service} · {timeAgo}
+        </p>
+      </figcaption>
+    </figure>
+  );
+}
+
 export function Testimonials() {
+  const [expanded, setExpanded] = useState(false);
+  const hasMore = testimonials.length > PREVIEW_COUNT;
+
+  const preview = testimonials.slice(0, PREVIEW_COUNT);
+  const rest = testimonials.slice(PREVIEW_COUNT);
+
   return (
     <section id="testimonials" className="section">
       <div className="container-page">
@@ -27,22 +62,61 @@ export function Testimonials() {
           </div>
         </div>
 
-        <div className="mt-14 columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6">
-          {testimonials.map((t) => (
-            <figure key={t.name} className="card break-inside-avoid">
-              <Stars count={t.rating} />
-              <blockquote className="mt-4 text-charcoal/80 dark:text-cream/80">
-                &ldquo;{t.quote}&rdquo;
-              </blockquote>
-              <figcaption className="mt-5 border-t border-black/5 pt-4 dark:border-white/10">
-                <p className="font-semibold">{t.name}</p>
-                <p className="text-xs text-charcoal/60 dark:text-cream/60">
-                  {t.service} · {t.timeAgo}
-                </p>
-              </figcaption>
-            </figure>
+        {/* Always-visible preview (first three) */}
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {preview.map((t) => (
+            <Review key={t.name} {...t} />
           ))}
         </div>
+
+        {/* Expandable remainder */}
+        {hasMore && (
+          <div className="relative">
+            {/* Collapsible region */}
+            <div
+              className={`grid overflow-hidden transition-all duration-500 ease-in-out ${
+                expanded
+                  ? "mt-6 grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
+              }`}
+              aria-hidden={!expanded}
+            >
+              <div className="min-h-0">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {rest.map((t) => (
+                    <Review key={t.name} {...t} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Fade overlay (only while collapsed) sits over the preview's
+                bottom edge to signal there's more to reveal. */}
+            {!expanded && (
+              <div className="pointer-events-none absolute inset-x-0 -top-28 h-28 bg-gradient-to-b from-transparent to-cream dark:to-emerald-deep" />
+            )}
+
+            {/* Toggle button */}
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                aria-expanded={expanded}
+                className="btn-secondary"
+              >
+                {expanded
+                  ? "Show fewer reviews"
+                  : `Show all ${testimonials.length} reviews`}
+                <Icon
+                  name="chevronDown"
+                  className={`h-4 w-4 transition-transform duration-300 ${
+                    expanded ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

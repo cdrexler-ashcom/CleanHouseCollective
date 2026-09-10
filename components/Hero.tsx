@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import { Icon } from "./Icon";
 import { useQuote } from "./QuoteProvider";
 import { site } from "@/data/site";
+import { CountUp } from "./CountUp";
 
 const trustPoints = [
   { icon: "shield", label: "Fully insured" },
@@ -11,17 +13,63 @@ const trustPoints = [
   { icon: "leaf", label: "Gentle products" },
 ];
 
+const stats = [
+  { end: 18, suffix: "", label: "Five-star reviews" },
+  { end: 30, suffix: "km", label: "Service radius" },
+  { end: 100, suffix: "%", label: "Satisfaction focus" },
+];
+
 export function Hero() {
   const { open } = useQuote();
+  const cardRef = useRef<HTMLDivElement | null>(null);
+
+  // Subtle pointer parallax on the hero card — desktop / fine-pointer only, so
+  // it never costs anything on touch devices. Transform-only for 60fps.
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (!finePointer || reduced) return;
+
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        el.style.transform = `perspective(1000px) rotateY(${px * 6}deg) rotateX(${
+          -py * 6
+        }deg)`;
+      });
+    };
+    const reset = () => {
+      cancelAnimationFrame(raf);
+      el.style.transform = "";
+    };
+
+    el.addEventListener("mousemove", onMove);
+    el.addEventListener("mouseleave", reset);
+    return () => {
+      el.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", reset);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   return (
     <section
       id="top"
       className="relative overflow-hidden pt-32 pb-20 lg:pt-40 lg:pb-28"
     >
+      {/* Animated aurora background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sage/30 blur-3xl" />
-        <div className="absolute top-40 -left-32 h-96 w-96 rounded-full bg-emerald/10 blur-3xl" />
+        <div className="animate-aurora absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sage/30 blur-3xl" />
+        <div className="animate-aurora-slow absolute top-40 -left-32 h-96 w-96 rounded-full bg-emerald/10 blur-3xl" />
+        <div className="animate-aurora absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-sage-light/20 blur-3xl" />
       </div>
 
       <div className="container-page grid items-center gap-16 lg:grid-cols-2">
@@ -34,9 +82,7 @@ export function Hero() {
 
           <h1 className="heading-xl mt-6">
             Come home to fresh,{" "}
-            <span className="text-emerald dark:text-sage-light">
-              without the fuss
-            </span>
+            <span className="text-shimmer">without the fuss</span>
           </h1>
 
           <p className="mt-6 max-w-xl text-lg text-charcoal/70 dark:text-cream/70">
@@ -47,7 +93,11 @@ export function Hero() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <button type="button" onClick={open} className="btn-primary">
+            <button
+              type="button"
+              onClick={open}
+              className="btn-primary sheen"
+            >
               Get a Free Quote
               <Icon name="arrowRight" className="h-4 w-4" />
             </button>
@@ -79,16 +129,19 @@ export function Hero() {
         </div>
 
         {/* Visual — brand logo feature card */}
-        <div className="relative animate-scale-in">
-          <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sage-light/50 via-cream to-sage/30 p-6 shadow-soft-lg sm:p-8 dark:from-emerald-light/30 dark:via-emerald-deep dark:to-emerald/20">
-            {/* Readable, softly-rounded cream panel holding the transparent logo */}
+        <div className="relative animate-scale-in [perspective:1000px]">
+          <div
+            ref={cardRef}
+            className="animate-float relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sage-light/50 via-cream to-sage/30 p-6 shadow-soft-lg transition-transform duration-200 ease-out will-change-transform sm:p-8 dark:from-emerald-light/30 dark:via-emerald-deep dark:to-emerald/20"
+          >
+            {/* Readable, softly-rounded cream panel holding the vector logo */}
             <div className="relative flex aspect-[4/5] items-center justify-center rounded-[1.6rem] bg-cream/90 p-8 shadow-soft ring-1 ring-black/5 backdrop-blur-sm sm:p-12">
               <Image
-                src="/logo-transparent.png"
+                src="/logo.svg"
                 alt="Clean House Collective"
                 width={360}
-                height={280}
-                className="h-auto w-full max-w-[16rem] object-contain"
+                height={300}
+                className="h-auto w-full max-w-[17rem] object-contain"
                 priority
               />
             </div>
@@ -103,12 +156,30 @@ export function Hero() {
                 </svg>
               ))}
             </div>
-            <p className="mt-1 text-sm font-semibold">18 five-star reviews</p>
+            <p className="mt-1 text-sm font-semibold">
+              <CountUp end={18} /> five-star reviews
+            </p>
             <p className="text-xs text-charcoal/60 dark:text-cream/60">
               Trusted by local homes
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Animated stats strip */}
+      <div className="container-page mt-16 lg:mt-24">
+        <dl className="grid grid-cols-3 gap-4 rounded-3xl border border-black/5 bg-white/60 p-6 text-center shadow-soft backdrop-blur-sm dark:border-white/10 dark:bg-white/5 sm:gap-8 sm:p-8">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <dd className="font-display text-3xl font-bold text-emerald dark:text-sage-light sm:text-4xl">
+                <CountUp end={s.end} suffix={s.suffix} />
+              </dd>
+              <dt className="mt-1 text-xs font-medium text-charcoal/60 dark:text-cream/60 sm:text-sm">
+                {s.label}
+              </dt>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

@@ -40,6 +40,14 @@ const paths: Record<string, React.ReactNode> = {
   leaf: <path d="M4 20c8 0 16-4 16-16C12 4 4 8 4 20zm0 0c2-4 5-7 9-9" />,
   arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
   chevronDown: <path d="M6 9l6 6 6-6" />,
+  flipCamera: (
+    <>
+      <path d="M12 9a3 3 0 100 6 3 3 0 000-6z" />
+      <path d="M3 8a2 2 0 012-2h2l1.5-2h7L18 6h1a2 2 0 012 2" />
+      <path d="M21 12a9 9 0 01-14.5 7M3 12a9 9 0 0114.5-7" />
+      <path d="M17 5.5V8h2.5M7 18.5V16H4.5" />
+    </>
+  ),
   close: <path d="M18 6L6 18M6 6l12 12" />,
   sun: (
     <path d="M12 3v2m0 14v2m9-9h-2M5 12H3m14.66-6.66l-1.42 1.42M7.76 16.24l-1.42 1.42m11.32 0l-1.42-1.42M7.76 7.76L6.34 6.34M12 8a4 4 0 100 8 4 4 0 000-8z" />

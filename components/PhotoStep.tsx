@@ -168,6 +168,8 @@ export function PhotoStep({
  * shutter is a normal flex child pinned within the safe-area inset, so it can
  * never be pushed off-screen or hidden behind the mobile browser chrome.
  */
+type Facing = "environment" | "user";
+
 function CameraCapture({
   onCapture,
   onClose,
@@ -182,6 +184,9 @@ function CameraCapture({
   const [mounted, setMounted] = useState(false);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [facing, setFacing] = useState<Facing>("environment");
+  const [switching, setSwitching] = useState(false);
+  const [hasMultiple, setHasMultiple] = useState(false);
 
   // Only render the portal on the client (document must exist).
   useEffect(() => setMounted(true), []);
@@ -196,41 +201,55 @@ function CameraCapture({
     };
   }, [mounted]);
 
-  // Start the camera once the portal (and the <video>) is in the DOM.
+  // Stop any active tracks.
+  function stopStream() {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+  }
+
+  // (Re)start the camera with the given facing mode. Not using `exact` so that
+  // devices with a single camera still work (they just ignore the preference).
+  async function startStream(mode: Facing) {
+    setReady(false);
+    setSwitching(true);
+    stopStream();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: mode },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(() => {});
+      }
+      setReady(true);
+      setError(null);
+
+      // After permission is granted we can see how many cameras exist, so we
+      // only show the flip control when it's actually useful.
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter((d) => d.kind === "videoinput");
+        setHasMultiple(cams.length > 1);
+      } catch {
+        /* ignore enumeration errors */
+      }
+    } catch {
+      setError(
+        "We couldn't access your camera. Please check your browser permissions, or upload a photo instead."
+      );
+    } finally {
+      setSwitching(false);
+    }
+  }
+
+  // Start on mount (and clean up on unmount).
   useEffect(() => {
     if (!mounted) return;
-    let cancelled = false;
-
-    async function start() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-          audio: false,
-        });
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play().catch(() => {});
-          setReady(true);
-        }
-      } catch {
-        setError(
-          "We couldn't access your camera. Please check your browser permissions, or upload a photo instead."
-        );
-      }
-    }
-
-    start();
-
-    return () => {
-      cancelled = true;
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    };
+    startStream("environment");
+    return () => stopStream();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
   // Close on Escape.
@@ -241,6 +260,12 @@ function CameraCapture({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  function flip() {
+    const next: Facing = facing === "environment" ? "user" : "environment";
+    setFacing(next);
+    startStream(next);
+  }
 
   function capture() {
     const video = videoRef.current;
@@ -266,6 +291,10 @@ function CameraCapture({
   }
 
   if (!mounted) return null;
+
+  // Mirror the preview for the front camera (natural "selfie" feel). The saved
+  // capture is drawn from the raw video, so it isn't mirrored.
+  const mirrored = facing === "user";
 
   const overlay = (
     <div
@@ -309,18 +338,22 @@ function CameraCapture({
               autoPlay
               playsInline
               muted
-              className="absolute inset-0 h-full w-full object-cover"
+              className={`absolute inset-0 h-full w-full object-cover ${
+                mirrored ? "[transform:scaleX(-1)]" : ""
+              }`}
             />
-            {!ready && (
+            {(!ready || switching) && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-sm text-white/80">Starting camera…</p>
+                <p className="text-sm text-white/80">
+                  {switching ? "Switching camera…" : "Starting camera…"}
+                </p>
               </div>
             )}
           </div>
 
           {/* Bottom controls — always visible, above the safe-area inset */}
           <div
-            className="flex flex-none flex-col items-center gap-3 px-4 pt-4"
+            className="flex flex-none items-center justify-center px-6 pt-4"
             style={{
               paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.25rem)",
             }}
@@ -330,15 +363,31 @@ function CameraCapture({
                 Photo limit reached — close to review your photos.
               </p>
             ) : (
-              <button
-                type="button"
-                onClick={capture}
-                disabled={!ready}
-                aria-label="Capture photo"
-                className="flex h-[4.5rem] w-[4.5rem] flex-none items-center justify-center rounded-full bg-white/25 ring-4 ring-white/60 backdrop-blur-sm transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <span className="h-14 w-14 rounded-full bg-white shadow-lg" />
-              </button>
+              <div className="relative flex w-full items-center justify-center">
+                {/* Shutter (centered) */}
+                <button
+                  type="button"
+                  onClick={capture}
+                  disabled={!ready}
+                  aria-label="Capture photo"
+                  className="flex h-[4.5rem] w-[4.5rem] flex-none items-center justify-center rounded-full bg-white/25 ring-4 ring-white/60 backdrop-blur-sm transition-transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <span className="h-14 w-14 rounded-full bg-white shadow-lg" />
+                </button>
+
+                {/* Flip (right) — only when more than one camera is available */}
+                {hasMultiple && (
+                  <button
+                    type="button"
+                    onClick={flip}
+                    disabled={switching}
+                    aria-label="Flip camera"
+                    className="absolute right-0 flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-sm transition-transform hover:bg-white/25 active:scale-95 disabled:opacity-40"
+                  >
+                    <Icon name="flipCamera" className="h-6 w-6" />
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </>

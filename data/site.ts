@@ -373,7 +373,7 @@ export type QuoteStep = {
   id: string;
   question: string;
   helper?: string;
-  type: "single" | "text" | "photos" | "contact";
+  type: "single" | "multi" | "text" | "photos" | "contact";
   options?: string[];
 };
 
@@ -417,16 +417,9 @@ export const quoteSteps: QuoteStep[] = [
   {
     id: "extras",
     question: "Any optional extras?",
-    helper: "Choose one to start — you can mention more in the notes.",
-    type: "single",
-    options: [
-      "None",
-      "Oven refresh",
-      "Fridge interior",
-      "Interior windows",
-      "Inside cupboards",
-      "Other (add in notes)",
-    ],
+    helper: "Select as many as you like — or none. You can add more detail in the notes.",
+    type: "multi",
+    options: optionalExtras,
   },
   {
     id: "suburb",

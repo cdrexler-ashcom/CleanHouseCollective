@@ -9,21 +9,39 @@ import { Testimonials } from "@/components/Testimonials";
 import { FAQ } from "@/components/FAQ";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
+import { ScrollProgress } from "@/components/ScrollProgress";
+import { Reveal } from "@/components/Reveal";
 
 export default function Home() {
   return (
     // QuoteProvider makes the questionnaire modal available to every CTA on the page.
     <QuoteProvider>
+      <ScrollProgress />
       <Navbar />
       <main>
         <Hero />
-        <About />
-        <Services />
-        <Pricing />
-        <ServiceArea />
-        <Testimonials />
-        <FAQ />
-        <Contact />
+        {/* Below-the-fold sections gently reveal as they enter the viewport. */}
+        <Reveal>
+          <About />
+        </Reveal>
+        <Reveal>
+          <Services />
+        </Reveal>
+        <Reveal>
+          <Pricing />
+        </Reveal>
+        <Reveal>
+          <ServiceArea />
+        </Reveal>
+        <Reveal>
+          <Testimonials />
+        </Reveal>
+        <Reveal>
+          <FAQ />
+        </Reveal>
+        <Reveal>
+          <Contact />
+        </Reveal>
       </main>
       <Footer />
     </QuoteProvider>

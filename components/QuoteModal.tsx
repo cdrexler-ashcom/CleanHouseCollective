@@ -6,10 +6,35 @@ import { quoteSteps, site } from "@/data/site";
 import { PhotoStep, type StagedPhoto } from "./PhotoStep";
 
 type Answers = Record<string, string>;
+type MultiAnswers = Record<string, string[]>;
 type ContactInfo = { name: string; email: string; phone: string };
+type ContactField = keyof ContactInfo;
 type Status = "idle" | "sending" | "success" | "error";
 
 const emptyContact: ContactInfo = { name: "", email: "", phone: "" };
+
+// --- Validation helpers -----------------------------------------------------
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateContact(c: ContactInfo): Partial<Record<ContactField, string>> {
+  const errors: Partial<Record<ContactField, string>> = {};
+
+  if (c.name.trim().length < 2) {
+    errors.name = "Please enter your name.";
+  }
+  if (!c.email.trim()) {
+    errors.email = "Please enter your email.";
+  } else if (!EMAIL_RE.test(c.email.trim())) {
+    errors.email = "That doesn't look like a valid email address.";
+  }
+  const digits = c.phone.replace(/\D/g, "");
+  if (!c.phone.trim()) {
+    errors.phone = "Please enter your mobile number.";
+  } else if (digits.length < 8 || digits.length > 12) {
+    errors.phone = "Please enter a valid contact number.";
+  }
+  return errors;
+}
 
 export function QuoteModal({
   isOpen,
@@ -20,7 +45,14 @@ export function QuoteModal({
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  const [multi, setMulti] = useState<MultiAnswers>({});
   const [contact, setContact] = useState<ContactInfo>(emptyContact);
+  const [touched, setTouched] = useState<Record<ContactField, boolean>>({
+    name: false,
+    email: false,
+    phone: false,
+  });
+  const [showErrors, setShowErrors] = useState(false);
   const [photos, setPhotos] = useState<StagedPhoto[]>([]);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -29,12 +61,17 @@ export function QuoteModal({
   const totalSteps = quoteSteps.length;
   const progress = Math.round(((stepIndex + 1) / totalSteps) * 100);
 
+  const contactErrors = useMemo(() => validateContact(contact), [contact]);
+
   // Reset whenever the modal is (re)opened.
   useEffect(() => {
     if (isOpen) {
       setStepIndex(0);
       setAnswers({});
+      setMulti({});
       setContact(emptyContact);
+      setTouched({ name: false, email: false, phone: false });
+      setShowErrors(false);
       setPhotos((prev) => {
         prev.forEach((p) => URL.revokeObjectURL(p.url));
         return [];
@@ -62,13 +99,10 @@ export function QuoteModal({
   const canContinue = useMemo(() => {
     if (!step) return false;
     if (step.type === "single") return Boolean(answers[step.id]);
-    if (step.type === "text" || step.type === "photos") return true; // optional
+    if (step.type === "multi" || step.type === "text" || step.type === "photos")
+      return true; // all optional
     if (step.type === "contact")
-      return (
-        contact.name.trim() !== "" &&
-        contact.email.trim() !== "" &&
-        contact.phone.trim() !== ""
-      );
+      return Object.keys(validateContact(contact)).length === 0;
     return false;
   }, [step, answers, contact]);
 
@@ -79,35 +113,51 @@ export function QuoteModal({
     if (step.type === "single") window.setTimeout(goNext, 180);
   }
 
+  function toggleMulti(value: string) {
+    setMulti((prev) => {
+      const current = prev[step.id] || [];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+      return { ...prev, [step.id]: next };
+    });
+  }
+
   function goNext() {
+    // Guard the contact step: block advancing (it's last anyway) if invalid.
     setStepIndex((i) => Math.min(i + 1, totalSteps - 1));
   }
   function goBack() {
     setStepIndex((i) => Math.max(i - 1, 0));
   }
 
-  function buildSummary() {
-    const labels: Record<string, string> = {
-      service: "Service",
-      frequency: "Frequency",
-      bedrooms: "Bedrooms",
-      bathrooms: "Bathrooms",
-      extras: "Optional extras",
-      suburb: "Suburb",
-      notes: "Notes",
-    };
-    return Object.entries(labels)
-      .map(([key, label]) => `${label}: ${answers[key] || "—"}`)
-      .join("\n");
+  function extrasValue() {
+    const list = multi["extras"] || [];
+    return list.length ? list.join(", ") : "None";
   }
 
-  /**
-   * Submit the quote. Primary path posts the answers + photos to the /api/quote
-   * serverless route (which emails the business, attachments included). If that
-   * endpoint isn't available (e.g. the site is deployed as a purely static
-   * export), we fall back to opening the visitor's email client via mailto.
-   */
+  function buildSummary() {
+    const rows: [string, string][] = [
+      ["Service", answers.service || "—"],
+      ["Frequency", answers.frequency || "—"],
+      ["Bedrooms", answers.bedrooms || "—"],
+      ["Bathrooms", answers.bathrooms || "—"],
+      ["Optional extras", extrasValue()],
+      ["Suburb", answers.suburb || "—"],
+      ["Notes", answers.notes || "—"],
+    ];
+    return rows.map(([l, v]) => `${l}: ${v}`).join("\n");
+  }
+
   async function handleSubmit() {
+    // Final validation gate.
+    const errs = validateContact(contact);
+    if (Object.keys(errs).length > 0) {
+      setShowErrors(true);
+      setTouched({ name: true, email: true, phone: true });
+      return;
+    }
+
     setStatus("sending");
     setErrorMsg(null);
 
@@ -116,7 +166,7 @@ export function QuoteModal({
     form.append("frequency", answers.frequency || "");
     form.append("bedrooms", answers.bedrooms || "");
     form.append("bathrooms", answers.bathrooms || "");
-    form.append("extras", answers.extras || "");
+    form.append("extras", extrasValue());
     form.append("suburb", answers.suburb || "");
     form.append("notes", answers.notes || "");
     form.append("name", contact.name);
@@ -131,7 +181,6 @@ export function QuoteModal({
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       setStatus("success");
     } catch {
-      // Fallback: mailto (note — attachments can't be included via mailto).
       openMailtoFallback();
     }
   }
@@ -157,6 +206,7 @@ export function QuoteModal({
 
   const submitting = status === "sending";
   const done = status === "success";
+  const isLast = stepIndex === totalSteps - 1;
 
   return (
     <div
@@ -170,10 +220,9 @@ export function QuoteModal({
         onClick={onClose}
       />
 
-      {/* Panel: fullscreen on mobile (uses the entire screen), a centered card
-          on larger screens. */}
+      {/* Panel: fullscreen on mobile, centered card on larger screens. */}
       <div className="relative flex h-[100dvh] max-h-[100dvh] w-full max-w-none flex-col overflow-hidden rounded-none bg-cream shadow-soft-lg animate-scale-in dark:bg-emerald-deep sm:h-auto sm:max-h-[92vh] sm:max-w-lg sm:rounded-3xl">
-        {/* Header (respects the top safe-area inset when fullscreen) */}
+        {/* Header */}
         <div
           className="flex items-center justify-between border-b border-black/5 px-6 py-5 dark:border-white/10"
           style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.25rem)" }}
@@ -247,6 +296,46 @@ export function QuoteModal({
                   </div>
                 )}
 
+                {/* Multi choice */}
+                {step.type === "multi" && step.options && (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {step.options.map((option) => {
+                        const selected = (multi[step.id] || []).includes(option);
+                        return (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => toggleMulti(option)}
+                            aria-pressed={selected}
+                            className={`flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-left text-sm font-medium transition-all ${
+                              selected
+                                ? "border-emerald bg-emerald text-cream shadow-soft"
+                                : "border-black/10 bg-white hover:border-emerald/40 dark:border-white/10 dark:bg-white/5"
+                            }`}
+                          >
+                            <span
+                              className={`flex h-5 w-5 flex-none items-center justify-center rounded-md border transition-colors ${
+                                selected
+                                  ? "border-cream bg-cream/20"
+                                  : "border-black/25 dark:border-white/30"
+                              }`}
+                            >
+                              {selected && (
+                                <Icon name="check" className="h-3.5 w-3.5" />
+                              )}
+                            </span>
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-3 text-xs text-charcoal/50 dark:text-cream/50">
+                      {(multi[step.id] || []).length} selected · optional
+                    </p>
+                  </>
+                )}
+
                 {/* Free text */}
                 {step.type === "text" && (
                   <textarea
@@ -273,29 +362,52 @@ export function QuoteModal({
                   <PhotoStep photos={photos} setPhotos={setPhotos} />
                 )}
 
-                {/* Contact */}
+                {/* Contact (validated) */}
                 {step.type === "contact" && (
                   <div className="grid gap-4">
                     <Field
                       label="Full name"
                       value={contact.name}
                       onChange={(v) => setContact((c) => ({ ...c, name: v }))}
+                      onBlur={() =>
+                        setTouched((t) => ({ ...t, name: true }))
+                      }
                       placeholder="Jane Citizen"
+                      autoComplete="name"
                       autoFocus
+                      error={
+                        (touched.name || showErrors) ? contactErrors.name : undefined
+                      }
                     />
                     <Field
                       label="Email"
                       type="email"
+                      inputMode="email"
                       value={contact.email}
                       onChange={(v) => setContact((c) => ({ ...c, email: v }))}
+                      onBlur={() =>
+                        setTouched((t) => ({ ...t, email: true }))
+                      }
                       placeholder="jane@example.com"
+                      autoComplete="email"
+                      error={
+                        (touched.email || showErrors) ? contactErrors.email : undefined
+                      }
                     />
                     <Field
                       label="Mobile"
                       type="tel"
+                      inputMode="tel"
                       value={contact.phone}
                       onChange={(v) => setContact((c) => ({ ...c, phone: v }))}
-                      placeholder="0400 000 000"
+                      onBlur={() =>
+                        setTouched((t) => ({ ...t, phone: true }))
+                      }
+                      placeholder="0499 930 422"
+                      autoComplete="tel"
+                      error={
+                        (touched.phone || showErrors) ? contactErrors.phone : undefined
+                      }
                     />
                   </div>
                 )}
@@ -308,7 +420,7 @@ export function QuoteModal({
           )}
         </div>
 
-        {/* Footer (respects the bottom safe-area inset when fullscreen) */}
+        {/* Footer */}
         {!done && (
           <div
             className="flex items-center justify-between gap-3 border-t border-black/5 px-6 py-5 dark:border-white/10"
@@ -325,7 +437,7 @@ export function QuoteModal({
               Back
             </button>
 
-            {stepIndex === totalSteps - 1 ? (
+            {isLast ? (
               <button
                 type="button"
                 onClick={handleSubmit}
@@ -342,7 +454,7 @@ export function QuoteModal({
                 disabled={!canContinue}
                 className="btn-primary disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {step.type === "photos" && photos.length === 0 ? "Skip" : "Continue"}
+                {optionalSkipLabel(step.type, photos.length, multi[step.id])}
                 <Icon name="arrowRight" className="h-4 w-4" />
               </button>
             )}
@@ -351,6 +463,16 @@ export function QuoteModal({
       </div>
     </div>
   );
+}
+
+function optionalSkipLabel(
+  type: string,
+  photoCount: number,
+  multiSel?: string[]
+) {
+  if (type === "photos" && photoCount === 0) return "Skip";
+  if (type === "multi" && (!multiSel || multiSel.length === 0)) return "Skip";
+  return "Continue";
 }
 
 function SuccessView({ onClose }: { onClose: () => void }) {
@@ -400,16 +522,24 @@ function Field({
   label,
   value,
   onChange,
+  onBlur,
   placeholder,
   type = "text",
+  inputMode,
+  autoComplete,
   autoFocus,
+  error,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  onBlur?: () => void;
   placeholder?: string;
   type?: string;
+  inputMode?: "text" | "email" | "tel" | "numeric";
+  autoComplete?: string;
   autoFocus?: boolean;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -418,12 +548,26 @@ function Field({
       </span>
       <input
         type={type}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
         value={value}
         autoFocus={autoFocus}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
         placeholder={placeholder}
-        className="w-full rounded-2xl border border-black/10 bg-white px-5 py-3.5 text-sm outline-none transition-colors focus:border-emerald dark:border-white/10 dark:bg-white/5"
+        aria-invalid={error ? "true" : "false"}
+        className={`w-full rounded-2xl border bg-white px-5 py-3.5 text-sm outline-none transition-colors dark:bg-white/5 ${
+          error
+            ? "border-red-400 focus:border-red-500"
+            : "border-black/10 focus:border-emerald dark:border-white/10"
+        }`}
       />
+      {error && (
+        <span className="mt-1.5 flex items-center gap-1 text-xs font-medium text-red-500">
+          <Icon name="close" className="h-3.5 w-3.5" />
+          {error}
+        </span>
+      )}
     </label>
   );
 }

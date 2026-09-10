@@ -11,6 +11,7 @@ import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { Reveal } from "@/components/Reveal";
+import { SectionDivider } from "@/components/SectionDivider";
 
 export default function Home() {
   return (
@@ -20,25 +21,43 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        {/* Below-the-fold sections gently reveal as they enter the viewport. */}
+
+        {/* Below-the-fold sections gently reveal as they enter the viewport,
+            with animated emblem dividers punctuating the transitions. */}
         <Reveal>
           <About />
         </Reveal>
+
+        <SectionDivider />
+
         <Reveal>
           <Services />
         </Reveal>
+
+        <SectionDivider />
+
         <Reveal>
           <Pricing />
         </Reveal>
+
+        <SectionDivider />
+
         <Reveal>
           <ServiceArea />
         </Reveal>
+
+        <SectionDivider />
+
         <Reveal>
           <Testimonials />
         </Reveal>
+
+        <SectionDivider />
+
         <Reveal>
           <FAQ />
         </Reveal>
+
         <Reveal>
           <Contact />
         </Reveal>

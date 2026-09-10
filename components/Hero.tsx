@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { Icon } from "./Icon";
 import { useQuote } from "./QuoteProvider";
@@ -70,6 +69,9 @@ export function Hero() {
         <div className="animate-aurora absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sage/30 blur-3xl" />
         <div className="animate-aurora-slow absolute top-40 -left-32 h-96 w-96 rounded-full bg-emerald/10 blur-3xl" />
         <div className="animate-aurora absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-sage-light/20 blur-3xl" />
+        {/* Smooth fade so the aurora dissolves elegantly into the next section
+            instead of being clipped at the section edge. */}
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-cream dark:to-emerald-deep" />
       </div>
 
       <div className="container-page grid items-center gap-16 lg:grid-cols-2">
@@ -134,15 +136,17 @@ export function Hero() {
             ref={cardRef}
             className="animate-float relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sage-light/50 via-cream to-sage/30 p-6 shadow-soft-lg transition-transform duration-200 ease-out will-change-transform sm:p-8 dark:from-emerald-light/30 dark:via-emerald-deep dark:to-emerald/20"
           >
-            {/* Readable, softly-rounded cream panel holding the vector logo */}
+            {/* Readable, softly-rounded cream panel holding the vector logo.
+                Uses a plain <img> (not next/image) for the SVG so it renders
+                exactly as authored, with no optimization layer in between. */}
             <div className="relative flex aspect-[4/5] items-center justify-center rounded-[1.6rem] bg-cream/90 p-8 shadow-soft ring-1 ring-black/5 backdrop-blur-sm sm:p-12">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src="/logo.svg"
                 alt="Clean House Collective"
                 width={360}
                 height={300}
                 className="h-auto w-full max-w-[17rem] object-contain"
-                priority
               />
             </div>
           </div>

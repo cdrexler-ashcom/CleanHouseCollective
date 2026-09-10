@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { testimonials } from "@/data/site";
 import { Icon } from "./Icon";
+import { Marquee } from "./Marquee";
 
 const PREVIEW_COUNT = 3;
 
@@ -62,8 +63,16 @@ export function Testimonials() {
           </div>
         </div>
 
+      </div>
+
+      {/* Full-bleed marquee of review highlights */}
+      <div className="mt-12">
+        <Marquee />
+      </div>
+
+      <div className="container-page">
         {/* Always-visible preview (first three) */}
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {preview.map((t) => (
             <Review key={t.name} {...t} />
           ))}

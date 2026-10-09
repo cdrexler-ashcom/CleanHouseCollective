@@ -5,7 +5,7 @@
  * questionnaire live here so the site is easy to refine as the business grows.
  *
  * Content sourced from the business's own materials:
- *  - "Clean House Collective — Flat-Rate" company document
+ *  - "Clean House Collective - Flat-Rate" company document
  *  - Airtasker 5-star client reviews
  */
 
@@ -35,7 +35,7 @@ export const site = {
 
   // ---- Booking deposit ----
   // A small deposit secures each booking. For now this is handled by direct
-  // deposit — the bank details below are emailed to the customer when we reply
+  // deposit - the bank details below are emailed to the customer when we reply
   // to their quote request. TODO: replace the placeholder bank details with the
   // real account information.
   booking: {
@@ -74,7 +74,7 @@ export const services: Service[] = [
     title: "Standard Refresh",
     tagline: "Regular maintenance cleaning",
     description:
-      "Our signature ongoing clean for homes that need regular maintenance. Available weekly, fortnightly or monthly — as well as one-off cleans. A flat-rate price for the service, not the clock.",
+      "Our signature ongoing clean for homes that need regular maintenance. Available weekly, fortnightly or monthly, as well as one-off cleans. A flat-rate price for the service, not the clock.",
     price: "From $120 per clean",
     icon: "sparkles",
     featured: true,
@@ -91,7 +91,7 @@ export const services: Service[] = [
     title: "Optional Extras",
     tagline: "Add a little something extra",
     description:
-      "Oven refresh, gas stove deep clean, fridge interior, interior windows, inside cupboards, extra bathrooms, additional rooms or wall cleaning — arranged before your booking.",
+      "Oven refresh, gas stove deep clean, fridge interior, interior windows, inside cupboards, extra bathrooms, additional rooms or wall cleaning, arranged before your booking.",
     price: "Quoted per task",
     icon: "heart",
   },
@@ -128,7 +128,7 @@ export const optionalExtras: string[] = [
   "Wall cleaning",
 ];
 
-// "Why choose us" value props — drawn from the all-inclusive flat-rate promise
+// "Why choose us" value props - drawn from the all-inclusive flat-rate promise
 export const valueProps = [
   {
     icon: "shield",
@@ -143,7 +143,7 @@ export const valueProps = [
   {
     icon: "leaf",
     title: "Gentle, carefully chosen products",
-    text: "We avoid harsh or abrasive products wherever possible — and we're happy to use your own on request.",
+    text: "We avoid harsh or abrasive products wherever possible, and we're happy to use your own on request.",
   },
   {
     icon: "check",
@@ -265,7 +265,7 @@ export const testimonials: Testimonial[] = [
     rating: 5,
   },
   {
-    quote: "Excellent service, spotless cleaning — would highly recommend.",
+    quote: "Excellent service, spotless cleaning, would highly recommend.",
     name: "Peter H.",
     service: "House clean",
     timeAgo: "9 months ago",
@@ -312,7 +312,7 @@ export const testimonials: Testimonial[] = [
     quote:
       "Sarah was super friendly, did the job quickly and did the job well! Would recommend to others.",
     name: "Kirralee D.",
-    service: "Urgent clean — bathrooms, windows, floors",
+    service: "Urgent clean, bathrooms, windows, floors",
     timeAgo: "11 months ago",
     rating: 5,
   },
@@ -331,22 +331,22 @@ export const faqs: FAQ[] = [
   {
     question: "How does your flat-rate pricing work?",
     answer:
-      "Your quoted flat rate is for the service, not an hourly booking. It includes fuel, insurance, professional equipment, cleaning products and labour — there's nothing for you to supply. Your final price is confirmed before your first clean, based on the size, layout and typical cleaning requirements of your home.",
+      "Your quoted flat rate is for the service, not an hourly booking. It includes fuel, insurance, professional equipment, cleaning products and labour, there's nothing for you to supply. Your final price is confirmed before your first clean, based on the size, layout and typical cleaning requirements of your home.",
   },
   {
     question: "How do I get a quote?",
     answer:
-      "Every home is a little different. Before your first clean we'll ask you to send through a few current photos or a short video of the main areas — particularly the kitchen and bathroom/s. And please, don't tidy up for us! Seeing your home as it normally is helps us provide an accurate flat-rate quote with no surprises on cleaning day.",
+      "Every home is a little different. Before your first clean we'll ask you to send through a few current photos or a short video of the main areas, particularly the kitchen and bathroom/s. And please, don't tidy up for us! Seeing your home as it normally is helps us provide an accurate flat-rate quote with no surprises on cleaning day.",
   },
   {
     question: "Do I need to be home during the clean?",
     answer:
-      "Not at all. If you won't be home, we'll arrange a suitable method of access beforehand — a key, lockbox, garage access or another agreed arrangement. Any keys, codes or alarm information are treated confidentially and used only to access your home for your service.",
+      "Not at all. If you won't be home, we'll arrange a suitable method of access beforehand, a key, lockbox, garage access or another agreed arrangement. Any keys, codes or alarm information are treated confidentially and used only to access your home for your service.",
   },
   {
     question: "Do you provide cleaning products and equipment?",
     answer:
-      "Yes. We arrive fully equipped with professional products and equipment, and we avoid harsh or abrasive products wherever possible. Prefer us to use your own products — or avoid something in particular? Just let us know before your clean.",
+      "Yes. We arrive fully equipped with professional products and equipment, and we avoid harsh or abrasive products wherever possible. Prefer us to use your own products, or avoid something in particular? Just let us know before your clean.",
   },
   {
     question: "What's your cancellation policy?",
@@ -356,7 +356,7 @@ export const faqs: FAQ[] = [
   {
     question: "Which suburbs do you service?",
     answer:
-      "We're based in Kallangur and service homes within approximately a 30 km radius across North Brisbane and the Moreton Bay region. Outside our usual area? Get in touch — we may still be able to help, though a small travel fee may apply.",
+      "We're based in Kallangur and service homes within approximately a 30 km radius across North Brisbane and the Moreton Bay region. Outside our usual area? Get in touch, we may still be able to help, though a small travel fee may apply.",
   },
   {
     question: "Do you have any offers for new clients?",
@@ -382,7 +382,7 @@ export type QuoteStep = {
  * so steps can be added, removed or reordered here.
  *
  * The "photos" step lets clients optionally upload or capture photos of the
- * main areas of their home — mirroring the business's real quoting process.
+ * main areas of their home - mirroring the business's real quoting process.
  */
 export const quoteSteps: QuoteStep[] = [
   {
@@ -426,7 +426,7 @@ export const quoteSteps: QuoteStep[] = [
   {
     id: "extras",
     question: "Any optional extras?",
-    helper: "Select as many as you like — or none. You can add more detail in the notes.",
+    helper: "Select as many as you like, or none. You can add more detail in the notes.",
     type: "multi",
     options: optionalExtras,
   },
@@ -440,7 +440,7 @@ export const quoteSteps: QuoteStep[] = [
     id: "photos",
     question: "Add photos of your home",
     helper:
-      "Optional but super helpful! A few photos of your kitchen and bathroom/s help us give an accurate flat-rate quote. And please — don't tidy up for us!",
+      "Optional but super helpful! A few photos of your kitchen and bathroom/s help us give an accurate flat-rate quote. And please, don't tidy up for us!",
     type: "photos",
   },
   {
@@ -453,7 +453,7 @@ export const quoteSteps: QuoteStep[] = [
     id: "contact",
     question: "Where can we send your quote?",
     helper:
-      "We'll reply with your personalised flat-rate quote. A $30 deposit (via direct deposit) secures your booking once you're ready — we'll include the details in our reply.",
+      "We'll reply with your personalised flat-rate quote. A $30 deposit (via direct deposit) secures your booking once you're ready, we'll include the details in our reply.",
     type: "contact",
   },
 ];

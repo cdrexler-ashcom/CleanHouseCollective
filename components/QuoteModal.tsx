@@ -138,13 +138,13 @@ export function QuoteModal({
 
   function buildSummary() {
     const rows: [string, string][] = [
-      ["Service", answers.service || "—"],
-      ["Frequency", answers.frequency || "—"],
-      ["Bedrooms", answers.bedrooms || "—"],
-      ["Bathrooms", answers.bathrooms || "—"],
+      ["Service", answers.service || "-"],
+      ["Frequency", answers.frequency || "-"],
+      ["Bedrooms", answers.bedrooms || "-"],
+      ["Bathrooms", answers.bathrooms || "-"],
       ["Optional extras", extrasValue()],
-      ["Suburb", answers.suburb || "—"],
-      ["Notes", answers.notes || "—"],
+      ["Suburb", answers.suburb || "-"],
+      ["Notes", answers.notes || "-"],
     ];
     return rows.map(([l, v]) => `${l}: ${v}`).join("\n");
   }
@@ -194,11 +194,11 @@ export function QuoteModal({
       `Email: ${contact.email}\n` +
       `Phone: ${contact.phone}\n\n` +
       (photos.length
-        ? `(${photos.length} photo(s) selected — please attach them to this email.)\n\n`
+        ? `(${photos.length} photo(s) selected, please attach them to this email.)\n\n`
         : "") +
       `Note: A ${site.booking.deposit} deposit secures the booking (details to be provided on confirmation).\n`;
     const mailto = `mailto:${site.contact.email}?subject=${encodeURIComponent(
-      `New Quote Request — ${answers.service || "Cleaning"}`
+      `New Quote Request - ${answers.service || "Cleaning"}`
     )}&body=${encodeURIComponent(body)}`;
     window.location.href = mailto;
     setStatus("success");
@@ -481,7 +481,7 @@ function SuccessView({ onClose }: { onClose: () => void }) {
       <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald text-cream">
         <Icon name="check" className="h-8 w-8" />
       </span>
-      <h4 className="font-display text-2xl font-bold">Thanks — we&apos;re on it!</h4>
+      <h4 className="font-display text-2xl font-bold">Thanks, we&apos;re on it!</h4>
       <p className="mt-3 max-w-sm text-charcoal/70 dark:text-cream/70">
         Your quote request has been sent, and a confirmation is on its way to
         your inbox. We&apos;ll be in touch soon with your personalised flat-rate
@@ -501,7 +501,7 @@ function SuccessView({ onClose }: { onClose: () => void }) {
         </div>
         <p className="mt-2 text-sm text-charcoal/70 dark:text-cream/70">
           A {site.booking.deposit} deposit (via direct deposit) secures your
-          booking. We&apos;ve emailed you the bank details — no need to pay until
+          booking. We&apos;ve emailed you the bank details, no need to pay until
           we&apos;ve confirmed your quote. New clients also get{" "}
           {site.offers.newClient}!
         </p>

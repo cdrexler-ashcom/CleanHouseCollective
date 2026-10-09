@@ -8,7 +8,7 @@ const quoteSteps = [
   {
     icon: "image",
     title: "Send a few photos",
-    text: "Share current photos or a short video of your main areas — especially the kitchen and bathroom/s.",
+    text: "Share current photos or a short video of your main areas, especially the kitchen and bathroom/s.",
   },
   {
     icon: "sparkles",
@@ -34,7 +34,7 @@ export function Pricing() {
           <p className="mt-5 text-lg text-charcoal/70 dark:text-cream/70">
             Your quoted flat rate includes fuel, insurance, professional
             equipment, cleaning products and labour. There&apos;s nothing for
-            you to supply — we arrive fully equipped and ready to get your home
+            you to supply, we arrive fully equipped and ready to get your home
             feeling fresh again.
           </p>
         </div>
@@ -75,7 +75,7 @@ export function Pricing() {
           <Icon name="tag" className="h-4 w-4 flex-none" />
           <span>
             A {site.booking.deposit} deposit secures your booking (paid by direct
-            deposit — details provided when we confirm your quote).
+            deposit, details provided when we confirm your quote).
           </span>
         </div>
 
@@ -109,7 +109,7 @@ export function Pricing() {
             {site.offers.newClient}
           </p>
           <p className="mt-2 text-cream/80">
-            New clients only. Get in touch for your personalised quote — you can
+            New clients only. Get in touch for your personalised quote, you can
             even add photos of your home right from the questionnaire.
           </p>
           <button

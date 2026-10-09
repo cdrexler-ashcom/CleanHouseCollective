@@ -2,7 +2,7 @@
   "name": "clean-house-collective",
   "version": "0.2.0",
   "private": true,
-  "description": "Modern marketing & lead-generation website for Clean House Collective — domestic cleaning across North Brisbane and South East Queensland.",
+  "description": "Modern marketing & lead-generation website for Clean House Collective - domestic cleaning across North Brisbane and South East Queensland.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,4 +1,4 @@
-# Clean House Collective — Website
+# Clean House Collective - Website
 
 A modern marketing & lead-generation website for **Clean House Collective**, a
 domestic cleaning business based in **Kallangur**, servicing **North Brisbane &
@@ -14,19 +14,19 @@ Built with **Next.js 14 (App Router)**, **TypeScript** and **Tailwind CSS**.
 
 - **Fully responsive**, mobile-first design with a hamburger menu
 - **Dark / light mode** with system-preference detection (no flash on load)
-- **Real business content** — services, flat-rate pricing, service area, FAQs
+- **Real business content** - services, flat-rate pricing, service area, FAQs
 - **18 five-star client reviews** (from Airtasker)
-- **Multi-step quote questionnaire** — the primary lead-conversion feature
+- **Multi-step quote questionnaire** - the primary lead-conversion feature
 - **📷 Photo upload _and_ live camera capture** in the quote form (optional now,
   ready to make mandatory later)
-- **Real email delivery (Resend)** — quote requests (with photo attachments) are
+- **Real email delivery (Resend)** - quote requests (with photo attachments) are
   emailed to the business, and the customer gets an automatic confirmation
-- **💳 $30 booking deposit** — direct-deposit details are emailed to the customer
+- **💳 $30 booking deposit** - direct-deposit details are emailed to the customer
   on submission and shown on the confirmation screen
-- **Business details** — phone `0499 930 422` and ABN `48 701 813 578` shown
+- **Business details** - phone `0499 930 422` and ABN `48 701 813 578` shown
   where relevant
-- **SEO foundations** — metadata, Open Graph tags, semantic HTML
-- **Content-driven** — nearly all copy lives in one file (`data/site.ts`)
+- **SEO foundations** - metadata, Open Graph tags, semantic HTML
+- **Content-driven** - nearly all copy lives in one file (`data/site.ts`)
 
 ---
 
@@ -54,7 +54,7 @@ The quote questionnaire includes a **Photos** step (`components/PhotoStep.tsx`)
 that lets clients:
 
 1. **Upload** existing images from their device, and/or
-2. **Use camera** — capture a photo live from the website. On mobile this opens
+2. **Use camera** - capture a photo live from the website. On mobile this opens
    the rear camera; on desktop it uses the webcam (via the `getUserMedia` API).
 
 Photos are optional for now. To make them **mandatory** later, open
@@ -114,7 +114,7 @@ to install.
 > gracefully falls back to opening the visitor's email client via `mailto:`
 > (note: `mailto:` can't carry photo attachments).
 
-### 💳 Booking deposit — update the bank details
+### 💳 Booking deposit - update the bank details
 
 The $30 deposit and its **direct-deposit bank details** live in
 `data/site.ts → site.booking`. The placeholders (`BSB 000-000`, account
@@ -160,7 +160,7 @@ clean-house-collective/
 ├── app/
 │   ├── api/quote/route.ts   # ✉️ Email endpoint (Resend: business + customer)
 │   ├── layout.tsx           # Fonts, metadata, theme script
-│   ├── page.tsx             # Home page — assembles all sections
+│   ├── page.tsx             # Home page - assembles all sections
 │   └── globals.css
 ├── components/
 │   ├── Navbar, Hero, About, Services, Pricing, ServiceArea,

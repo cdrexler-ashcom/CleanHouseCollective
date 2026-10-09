@@ -15,8 +15,8 @@ export type StagedPhoto = {
  * Photo step for the quote questionnaire.
  *
  * Supports TWO ways to add photos:
- *   1. Upload — choose existing images from the device.
- *   2. Camera — capture a photo live from the website using the device camera
+ *   1. Upload - choose existing images from the device.
+ *   2. Camera - capture a photo live from the website using the device camera
  *      (rear camera preferred on mobile; webcam on desktop).
  *
  * Photos are optional for now. Limits (count + size) come from `photoLimits`.
@@ -155,13 +155,13 @@ export function PhotoStep({
 }
 
 /**
- * Live camera capture — a TRUE fullscreen overlay.
+ * Live camera capture - a TRUE fullscreen overlay.
  *
  * Rendered through a React portal to `document.body` so it escapes the quote
  * modal's transform/overflow context. (The modal panel uses a CSS `transform`
  * for its open animation; a `position: fixed` child inside a transformed
  * ancestor is positioned relative to that ancestor and clipped by its
- * `overflow-hidden` — which was hiding the shutter button. Portaling to
+ * `overflow-hidden` - which was hiding the shutter button. Portaling to
  * <body> fixes this completely.)
  *
  * Layout is a flex column: top bar / video (flex-1) / bottom controls. The
@@ -351,7 +351,7 @@ function CameraCapture({
             )}
           </div>
 
-          {/* Bottom controls — always visible, above the safe-area inset */}
+          {/* Bottom controls - always visible, above the safe-area inset */}
           <div
             className="flex flex-none items-center justify-center px-6 pt-4"
             style={{
@@ -360,7 +360,7 @@ function CameraCapture({
           >
             {disabled ? (
               <p className="rounded-full bg-white/10 px-4 py-2 text-center text-sm text-white/90">
-                Photo limit reached — close to review your photos.
+                Photo limit reached, close to review your photos.
               </p>
             ) : (
               <div className="relative flex w-full items-center justify-center">
@@ -375,7 +375,7 @@ function CameraCapture({
                   <span className="h-14 w-14 rounded-full bg-white shadow-lg" />
                 </button>
 
-                {/* Flip (right) — only when more than one camera is available */}
+                {/* Flip (right) - only when more than one camera is available */}
                 {hasMultiple && (
                   <button
                     type="button"

@@ -7,12 +7,13 @@ import { LogoMark } from "./LogoMark";
  * Animated section divider.
  *
  * A pair of gradient hairlines that "draw" outward from a centre emblem, which
- * pops in with a subtle spring, as the divider scrolls into view. Purely
+ * pops in with a subtle spring, as the divider scrolls into view, and resets
+ * when it leaves the viewport so the animation replays on re-entry. Purely
  * transform/opacity based (cheap on mobile) and disabled under reduced motion
  * via the CSS in globals.css.
  *
  * `variant="wave"` renders a soft SVG wave that blends one section's background
- * into the next — nice between alternating-background sections.
+ * into the next - nice between alternating-background sections.
  */
 export function SectionDivider({
   variant = "emblem",
@@ -34,13 +35,11 @@ export function SectionDivider({
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
-          if (e.isIntersecting) {
-            setVisible(true);
-            obs.unobserve(e.target);
-          }
+          if (e.intersectionRatio >= 0.6) setVisible(true);
+          else if (e.intersectionRatio === 0) setVisible(false);
         });
       },
-      { threshold: 0.6 }
+      { threshold: [0, 0.6] }
     );
     obs.observe(el);
     return () => obs.disconnect();

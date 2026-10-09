@@ -19,7 +19,7 @@ const QuoteContext = createContext<QuoteContextValue | null>(null);
 
 /**
  * Wraps the app so any component can trigger the quote questionnaire modal
- * via the `useQuote()` hook — e.g. `const { open } = useQuote();`.
+ * via the `useQuote()` hook - e.g. `const { open } = useQuote();`.
  */
 export function QuoteProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);

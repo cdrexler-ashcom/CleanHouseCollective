@@ -37,10 +37,11 @@ export function CountUp({
       return;
     }
 
+    let raf = 0;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !started.current) {
+          if (entry.intersectionRatio >= 0.4 && !started.current) {
             started.current = true;
             const start = performance.now();
             const tick = (now: number) => {
@@ -48,18 +49,25 @@ export function CountUp({
               // easeOutCubic
               const eased = 1 - Math.pow(1 - t, 3);
               setValue(Math.round(eased * end));
-              if (t < 1) requestAnimationFrame(tick);
+              if (t < 1) raf = requestAnimationFrame(tick);
             };
-            requestAnimationFrame(tick);
-            observer.unobserve(entry.target);
+            raf = requestAnimationFrame(tick);
+          } else if (entry.intersectionRatio === 0 && started.current) {
+            // Out of view: reset so the count replays on re-entry.
+            started.current = false;
+            cancelAnimationFrame(raf);
+            setValue(0);
           }
         });
       },
-      { threshold: 0.4 }
+      { threshold: [0, 0.4] }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
   }, [end, duration]);
 
   return (

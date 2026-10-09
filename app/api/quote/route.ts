@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { site } from "@/data/site";
 
 /**
- * Quote request email endpoint — powered by Resend.
+ * Quote request email endpoint - powered by Resend.
  * --------------------------------------------------------------------------
  * Receives the quote questionnaire (as multipart/form-data, including any
  * photos the client uploaded or captured) and:
  *
- *   1. Emails the business (QUOTE_TO) a full notification — photos attached.
+ *   1. Emails the business (QUOTE_TO) a full notification - photos attached.
  *   2. Emails the customer a friendly confirmation that includes the $30
  *      booking deposit direct-deposit details.
  *
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       from,
       to: [to],
       reply_to: data.email, // replying goes straight to the customer
-      subject: `New Quote Request — ${data.service || "Cleaning"} (${
+      subject: `New Quote Request - ${data.service || "Cleaning"} (${
         data.suburb || "SEQ"
       })`,
       text: businessText(data, attachments.length),
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
         from,
         to: [data.email],
         reply_to: to,
-        subject: "We've received your quote request — Clean House Collective",
+        subject: "We've received your quote request - Clean House Collective",
         text: customerText(data),
         html: customerHtml(data),
       });
@@ -223,7 +223,7 @@ function summaryPairsHtml(rows: [string, string][]): string {
         `<tr>
            <td style="padding:6px 12px;border-bottom:1px solid #eee;font-weight:bold;width:150px">${label}</td>
            <td style="padding:6px 12px;border-bottom:1px solid #eee">${
-             value ? escapeHtml(value) : "—"
+             value ? escapeHtml(value) : "-"
            }</td>
          </tr>`
     )
@@ -243,7 +243,7 @@ function businessText(data: QuoteData, photoCount: number): string {
   return (
     `New quote request from the Clean House Collective website\n` +
     `========================================================\n\n` +
-    rows.map(([l, v]) => `${l}: ${v || "—"}`).join("\n") +
+    rows.map(([l, v]) => `${l}: ${v || "-"}`).join("\n") +
     `\n\n--- Contact ---\n` +
     `Name:  ${data.name}\n` +
     `Email: ${data.email}\n` +
@@ -284,15 +284,15 @@ function customerText(data: QuoteData): string {
   const b = site.booking;
   return (
     `Hi ${data.name},\n\n` +
-    `Thanks for reaching out to Clean House Collective — we've received your ` +
+    `Thanks for reaching out to Clean House Collective - we've received your ` +
     `quote request and we'll be in touch soon with your personalised flat-rate quote.\n\n` +
     `Here's a summary of what you sent us:\n` +
-    `- Service: ${data.service || "—"}\n` +
-    `- Frequency: ${data.frequency || "—"}\n` +
-    `- Bedrooms: ${data.bedrooms || "—"}\n` +
-    `- Bathrooms: ${data.bathrooms || "—"}\n` +
-    `- Optional extras: ${data.extras || "—"}\n` +
-    `- Suburb: ${data.suburb || "—"}\n` +
+    `- Service: ${data.service || "-"}\n` +
+    `- Frequency: ${data.frequency || "-"}\n` +
+    `- Bedrooms: ${data.bedrooms || "-"}\n` +
+    `- Bathrooms: ${data.bathrooms || "-"}\n` +
+    `- Optional extras: ${data.extras || "-"}\n` +
+    `- Suburb: ${data.suburb || "-"}\n` +
     (data.notes ? `- Notes: ${data.notes}\n` : "") +
     `\nSecuring your booking\n` +
     `---------------------\n` +

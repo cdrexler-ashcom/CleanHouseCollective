@@ -63,7 +63,7 @@ export function ServiceArea() {
           </ul>
 
           <p className="mt-7 text-sm text-charcoal/70 dark:text-cream/70">
-            Outside our usual area? We may still be able to help — a small travel
+            Outside our usual area? We may still be able to help, a small travel
             fee may apply.{" "}
             <button
               type="button"

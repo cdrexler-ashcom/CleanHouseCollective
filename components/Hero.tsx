@@ -22,7 +22,7 @@ export function Hero() {
   const { open } = useQuote();
   const cardRef = useRef<HTMLDivElement | null>(null);
 
-  // Subtle pointer parallax on the hero card — desktop / fine-pointer only, so
+  // Subtle pointer parallax on the hero card - desktop / fine-pointer only, so
   // it never costs anything on touch devices. Transform-only for 60fps.
   useEffect(() => {
     const el = cardRef.current;
@@ -90,7 +90,7 @@ export function Hero() {
           <p className="mt-6 max-w-xl text-lg text-charcoal/70 dark:text-cream/70">
             Regular domestic house cleaning based in Kallangur, servicing homes
             across North Brisbane &amp; Moreton Bay. We take care of the cleaning
-            so you can spend less time worrying about the house — and more time
+            so you can spend less time worrying about the house, and more time
             enjoying it.
           </p>
 
@@ -112,7 +112,7 @@ export function Hero() {
           {/* New client offer */}
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-emerald/10 px-4 py-2 text-sm font-semibold text-emerald dark:bg-white/10 dark:text-sage-light">
             <Icon name="tag" className="h-4 w-4" />
-            {site.offers.newClient} — new clients
+            {site.offers.newClient}, new clients
           </div>
 
           <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
@@ -130,7 +130,7 @@ export function Hero() {
           </ul>
         </div>
 
-        {/* Visual — brand logo feature card */}
+        {/* Visual - brand logo feature card */}
         <div className="relative animate-scale-in [perspective:1000px]">
           <div
             ref={cardRef}

@@ -15,7 +15,7 @@ import { useQuote } from "./QuoteProvider";
  *  - Every grid/flex child gets `min-w-0` so it can shrink below its intrinsic
  *    content width. Without this, the long email address
  *    (cleanhousecollective@outlook.com) sets a large min-content width that
- *    blows the grid wider than the screen — which was clipping the heading.
+ *    blows the grid wider than the screen - which was clipping the heading.
  *  - The email value uses `break-words` so it wraps instead of overflowing.
  */
 export function Contact() {
@@ -48,7 +48,7 @@ export function Contact() {
         {/* `isolate` creates a stacking context so the decorative layer can sit
             safely behind the content with -z-10. */}
         <div className="relative isolate rounded-3xl bg-emerald text-cream shadow-soft-lg">
-          {/* Decorative layer — clipped on its own so it can never influence
+          {/* Decorative layer - clipped on its own so it can never influence
               the width/height of the actual content. */}
           <div
             aria-hidden="true"
@@ -72,7 +72,7 @@ export function Contact() {
                 Whether you&apos;re after a weekly helping hand, a fortnightly
                 refresh or your home needs some extra attention, we&apos;d love
                 to hear from you. Request your personalised flat-rate quote in
-                under a minute — photos optional but welcome.
+                under a minute, photos optional but welcome.
               </p>
 
               <button

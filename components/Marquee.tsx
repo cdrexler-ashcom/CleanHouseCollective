@@ -34,7 +34,7 @@ function Pill({ quote, name }: { quote: string; name: string }) {
         &ldquo;{quote}&rdquo;
       </span>
       <span className="whitespace-nowrap text-xs font-semibold text-sage-dark dark:text-sage-light">
-        — {name}
+        - {name}
       </span>
     </div>
   );

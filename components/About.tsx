@@ -12,14 +12,14 @@ export function About() {
           </h2>
           <p className="mt-6 text-lg text-charcoal/70 dark:text-cream/70">
             Clean House Collective is a local, Kallangur-based cleaning service
-            specialising in ongoing home cleaning — weekly, fortnightly and
-            monthly — as well as one-off cleans and deeper refreshes.
+            specialising in ongoing home cleaning (weekly, fortnightly and
+            monthly) as well as one-off cleans and deeper refreshes.
           </p>
           <p className="mt-4 text-charcoal/70 dark:text-cream/70">
             Our flat-rate pricing is for the service, not the clock. That means
             we focus on completing your agreed clean thoroughly, without rushing
-            through your home or watching the time. No surprises on cleaning day
-            — you&apos;ll always know your agreed service and price before we
+            through your home or watching the time. No surprises on cleaning day,
+            you&apos;ll always know your agreed service and price before we
             arrive.
           </p>
         </div>

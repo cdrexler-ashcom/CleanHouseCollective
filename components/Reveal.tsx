@@ -9,13 +9,14 @@ type Direction = "up" | "left" | "right" | "scale";
  *
  * Uses a single IntersectionObserver per element to add `.is-visible` when the
  * element scrolls into view, triggering the CSS transition defined in
- * globals.css. Reveals run once (then unobserve) for performance, and the CSS
- * automatically disables the effect under `prefers-reduced-motion`.
+ * globals.css. The reveal resets once the element is fully out of view, so it
+ * replays whenever the user scrolls away and back. The CSS automatically
+ * disables the effect under `prefers-reduced-motion`.
  *
  * Two modes:
  *  - Default: the wrapper itself reveals.
  *  - `stagger` set: the wrapper becomes a "group" whose direct children each
- *    reveal in sequence (incremental delay) once the group enters view — great
+ *    reveal in sequence (incremental delay) once the group enters view - great
  *    for grids and lists.
  */
 export function Reveal({
@@ -43,7 +44,7 @@ export function Reveal({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || seen) return;
+    if (!el) return;
 
     if (typeof IntersectionObserver === "undefined") {
       setSeen(true);
@@ -53,18 +54,16 @@ export function Reveal({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setSeen(true);
-            observer.unobserve(entry.target);
-          }
+          if (entry.intersectionRatio >= amount) setSeen(true);
+          else if (entry.intersectionRatio === 0) setSeen(false);
         });
       },
-      { threshold: amount, rootMargin: "0px 0px -8% 0px" }
+      { threshold: [0, amount], rootMargin: "0px 0px -8% 0px" }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [seen, amount]);
+  }, [amount]);
 
   const revealValue = direction === "up" ? "true" : direction;
   const Comp = Tag as any;

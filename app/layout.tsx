@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { site } from "@/data/site";
 
 const inter = Inter({
@@ -84,6 +85,7 @@ export default function RootLayout({
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important}`}</style>
         </noscript>
         {children}
+        <Analytics />
       </body>
     </html>
   );

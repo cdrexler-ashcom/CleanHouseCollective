@@ -281,15 +281,20 @@
 
 /* --- First-load "mop" intro (see components/CleanIntro.tsx) --- */
 .chc-intro {
-  --chc-pass: 0.75s; /* duration of one mop pass */
-  --chc-step: 0.8s; /* delay between the start of each pass */
+  --chc-pass: 0.7s; /* duration of the wipe itself */
+  --chc-lead: 0.15s; /* mop travel before it reaches the screen edge */
+  --chc-run: 1s; /* mop total: lead + wipe + lead (exits off-screen) */
+  /* Gentle ease: never drops to zero speed at the ends, so the mop does not
+     stall at the screen edge before leaving. */
+  --chc-ease: cubic-bezier(0.3, 0.2, 0.7, 0.8);
+  --chc-step: 0.85s; /* delay between the start of each pass */
   --chc-start: 0.15s;
   position: fixed;
   inset: 0;
   z-index: 100;
   overflow: hidden;
   /* Safety net: if JS never unmounts the overlay, hide it when finished. */
-  animation: chc-hide 0s linear 3.5s forwards;
+  animation: chc-hide 0s linear 3.85s forwards;
 }
 .chc-band {
   position: absolute;
@@ -309,7 +314,8 @@
     radial-gradient(circle at 63% 25%, rgba(120, 96, 60, 0.14) 0 18px, transparent 19px),
     radial-gradient(circle at 86% 62%, rgba(120, 96, 60, 0.16) 0 26px, transparent 27px),
     linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
-  animation: var(--chc-pass) cubic-bezier(0.45, 0.05, 0.35, 1) var(--chc-delay) both;
+  animation: var(--chc-pass) var(--chc-ease)
+    calc(var(--chc-delay) + var(--chc-lead)) both;
 }
 .dark .chc-cover {
   background-color: #101a18;
@@ -326,15 +332,16 @@
   animation-name: chc-wipe-rtl;
 }
 
-/* The mop rides the leading edge of the wipe (same duration and easing). */
+/* The mop enters from the side, rides the leading edge of the wipe (same
+   duration and easing) and then exits off the opposite side of the screen.
+   Its head is as tall as the band, so it covers exactly the strip it cleans. */
 .chc-mop {
   position: absolute;
-  top: 50%;
+  top: 0;
+  height: 100%;
   z-index: 2;
   width: 0;
-  height: 0;
-  opacity: 0;
-  animation: var(--chc-pass) cubic-bezier(0.45, 0.05, 0.35, 1) var(--chc-delay) both;
+  animation: var(--chc-run) linear var(--chc-delay) both;
 }
 .chc-ltr .chc-mop {
   animation-name: chc-mop-ltr;
@@ -345,36 +352,93 @@
 .chc-mop-flip {
   position: absolute;
   left: 0;
-  bottom: 0;
+  top: 0;
   width: 0;
-  height: 0;
+  height: 100%;
 }
 .chc-rtl .chc-mop-flip {
   transform: scaleX(-1);
 }
-.chc-mop-svg {
+/* Round string-mop head, as wide as the band is tall. Its centre sits just
+   ahead of the wipe edge so the head covers the edge of the clean area. */
+.chc-head {
   position: absolute;
-  left: -45px; /* mop head sits on the wipe edge */
-  bottom: -26px;
-  max-width: none;
-  transform-origin: 40% 90%;
-  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
-  animation: chc-mop-sway 0.3s ease-in-out var(--chc-delay) 3 alternate both;
+  top: 0;
+  left: 0;
+  height: 100%;
+  aspect-ratio: 1;
+  transform: translateX(-42%);
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.25));
 }
-/* Soapy shine trailing behind the mop on the freshly cleaned side. */
+/* Each strand radiates from the head centre at angle --a. */
+.chc-strand {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 9%;
+  height: var(--len);
+  margin-left: -4.5%;
+  border-radius: 999px;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--a));
+}
+.chc-strand-front {
+  background: linear-gradient(0deg, #e4ebe4, #fafaf7 40%, #ffffff);
+  box-shadow: 0 0 0 1px rgba(107, 140, 111, 0.25);
+}
+.chc-strand-back {
+  background: linear-gradient(0deg, #b8c8bb, #d9e2da 50%, #e9eee8);
+}
+.chc-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22%;
+  height: 22%;
+  margin: -11% 0 0 -11%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c9d2d7, #6f7b82);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+.chc-handle {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 7px;
+  height: 90vh;
+  margin-left: -3.5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #a07f4e, #7a5c30);
+  transform-origin: bottom center;
+  transform: rotate(-22deg);
+  animation: chc-handle-sway 0.3s ease-in-out var(--chc-delay) 3 alternate both;
+}
+/* Wet sheen left on the freshly cleaned side, behind the strands. */
 .chc-foam {
   position: absolute;
-  right: 0;
-  bottom: -30px;
-  width: 90px;
-  height: 70px;
-  transform: translateX(-30px);
-  border-radius: 40px;
-  background: radial-gradient(
-    closest-side,
-    rgba(255, 255, 255, 0.55),
-    rgba(255, 255, 255, 0)
+  right: 50%;
+  top: 0;
+  width: calc(50% + 60px);
+  height: 100%;
+  background: linear-gradient(
+    270deg,
+    rgba(190, 225, 245, 0.45),
+    rgba(190, 225, 245, 0)
   );
+}
+/* Water droplets flicked over the top of the mop as it wipes. */
+.chc-droplet {
+  position: absolute;
+  top: -2px;
+  left: calc(50% + var(--x));
+  width: var(--s);
+  height: var(--s);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  background: var(--c);
+  box-shadow: inset -1px -1px 0 rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  animation: chc-droplet 0.5s ease-out
+    calc(var(--chc-delay) + var(--chc-lead) + var(--k) * 0.07s) both;
 }
 
 @keyframes chc-wipe-ltr {
@@ -386,20 +450,26 @@
   to { clip-path: inset(0 100% 0 0); }
 }
 @keyframes chc-mop-ltr {
-  0% { left: 0%; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { left: 100%; opacity: 0; }
+  0% { left: calc(0% - 600px); animation-timing-function: linear; }
+  15% { left: 0%; animation-timing-function: var(--chc-ease); }
+  85% { left: 100%; animation-timing-function: linear; }
+  100% { left: calc(100% + 600px); }
 }
 @keyframes chc-mop-rtl {
-  0% { left: 100%; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { left: 0%; opacity: 0; }
+  0% { left: calc(100% + 600px); animation-timing-function: linear; }
+  15% { left: 100%; animation-timing-function: var(--chc-ease); }
+  85% { left: 0%; animation-timing-function: linear; }
+  100% { left: calc(0% - 600px); }
 }
-@keyframes chc-mop-sway {
-  from { transform: rotate(-9deg); }
-  to { transform: rotate(9deg); }
+@keyframes chc-droplet {
+  0% { opacity: 0; transform: translate(0, 0); }
+  15% { opacity: 0.9; }
+  55% { opacity: 0.8; transform: translate(calc(var(--dx) * 0.6), var(--dy)); }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) * -0.3 + 36px)); }
+}
+@keyframes chc-handle-sway {
+  from { transform: rotate(-27deg); }
+  to { transform: rotate(-17deg); }
 }
 @keyframes chc-hide {
   to { visibility: hidden; }

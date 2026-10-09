@@ -278,3 +278,135 @@
     scroll-behavior: auto;
   }
 }
+
+/* --- First-load "mop" intro (see components/CleanIntro.tsx) --- */
+.chc-intro {
+  --chc-pass: 0.75s; /* duration of one mop pass */
+  --chc-step: 0.8s; /* delay between the start of each pass */
+  --chc-start: 0.15s;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  /* Safety net: if JS never unmounts the overlay, hide it when finished. */
+  animation: chc-hide 0s linear 3.5s forwards;
+}
+.chc-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% / var(--n) * var(--i));
+  height: calc(100% / var(--n) + 1px); /* +1px avoids seams between bands */
+  --chc-delay: calc(var(--chc-start) + var(--chc-step) * var(--i));
+}
+.chc-cover {
+  position: absolute;
+  inset: 0;
+  background-color: #e6e1d3;
+  background-image:
+    radial-gradient(circle at 12% 30%, rgba(120, 96, 60, 0.16) 0 14px, transparent 15px),
+    radial-gradient(circle at 38% 70%, rgba(120, 96, 60, 0.12) 0 22px, transparent 23px),
+    radial-gradient(circle at 63% 25%, rgba(120, 96, 60, 0.14) 0 18px, transparent 19px),
+    radial-gradient(circle at 86% 62%, rgba(120, 96, 60, 0.16) 0 26px, transparent 27px),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.08));
+  animation: var(--chc-pass) cubic-bezier(0.45, 0.05, 0.35, 1) var(--chc-delay) both;
+}
+.dark .chc-cover {
+  background-color: #101a18;
+  background-image:
+    radial-gradient(circle at 12% 30%, rgba(200, 180, 140, 0.06) 0 14px, transparent 15px),
+    radial-gradient(circle at 38% 70%, rgba(200, 180, 140, 0.05) 0 22px, transparent 23px),
+    radial-gradient(circle at 63% 25%, rgba(200, 180, 140, 0.06) 0 18px, transparent 19px),
+    radial-gradient(circle at 86% 62%, rgba(200, 180, 140, 0.07) 0 26px, transparent 27px);
+}
+.chc-ltr .chc-cover {
+  animation-name: chc-wipe-ltr;
+}
+.chc-rtl .chc-cover {
+  animation-name: chc-wipe-rtl;
+}
+
+/* The mop rides the leading edge of the wipe (same duration and easing). */
+.chc-mop {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  animation: var(--chc-pass) cubic-bezier(0.45, 0.05, 0.35, 1) var(--chc-delay) both;
+}
+.chc-ltr .chc-mop {
+  animation-name: chc-mop-ltr;
+}
+.chc-rtl .chc-mop {
+  animation-name: chc-mop-rtl;
+}
+.chc-mop-flip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+}
+.chc-rtl .chc-mop-flip {
+  transform: scaleX(-1);
+}
+.chc-mop-svg {
+  position: absolute;
+  left: -45px; /* mop head sits on the wipe edge */
+  bottom: -26px;
+  max-width: none;
+  transform-origin: 40% 90%;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+  animation: chc-mop-sway 0.3s ease-in-out var(--chc-delay) 3 alternate both;
+}
+/* Soapy shine trailing behind the mop on the freshly cleaned side. */
+.chc-foam {
+  position: absolute;
+  right: 0;
+  bottom: -30px;
+  width: 90px;
+  height: 70px;
+  transform: translateX(-30px);
+  border-radius: 40px;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+@keyframes chc-wipe-ltr {
+  from { clip-path: inset(0 0 0 0); }
+  to { clip-path: inset(0 0 0 100%); }
+}
+@keyframes chc-wipe-rtl {
+  from { clip-path: inset(0 0 0 0); }
+  to { clip-path: inset(0 100% 0 0); }
+}
+@keyframes chc-mop-ltr {
+  0% { left: 0%; opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+@keyframes chc-mop-rtl {
+  0% { left: 100%; opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { left: 0%; opacity: 0; }
+}
+@keyframes chc-mop-sway {
+  from { transform: rotate(-9deg); }
+  to { transform: rotate(9deg); }
+}
+@keyframes chc-hide {
+  to { visibility: hidden; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chc-intro {
+    display: none;
+  }
+}

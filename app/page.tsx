@@ -1,3 +1,4 @@
+import { CleanIntro } from "@/components/CleanIntro";
 import { QuoteProvider } from "@/components/QuoteProvider";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -17,6 +18,7 @@ export default function Home() {
   return (
     // QuoteProvider makes the questionnaire modal available to every CTA on the page.
     <QuoteProvider>
+      <CleanIntro />
       <ScrollProgress />
       <Navbar />
       <main>

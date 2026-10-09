@@ -48,8 +48,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Declares that the site supports both schemes so mobile browsers do not
+  // apply their own forced dark mode on top of ours.
+  colorScheme: "light dark",
   themeColor: "#0D4F45",
 };
+
+const THEME_SCRIPT = `(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem('theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=null;try{var m=document.cookie.match(/(?:^|; )theme=(dark|light)/);if(m)t=m[1]}catch(e){}}if(!t){try{t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch(e){t='light'}}if(t==='dark')d.classList.add('dark');d.style.colorScheme=t;})();`;
 
 export default function RootLayout({
   children,
@@ -57,14 +62,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-AU" className={`${inter.variable} ${outfit.variable}`}>
-      <body>
-        {/* Prevent dark-mode flash: applies saved/system theme before paint */}
+    // suppressHydrationWarning: the inline script below adds the `dark` class
+    // and colour-scheme to <html> before React hydrates, so they intentionally
+    // differ from the server markup.
+    <html
+      lang="en-AU"
+      className={`${inter.variable} ${outfit.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Applies the saved (localStorage, then cookie) or system theme before
+            first paint so there is no flash or late switch. Keep in sync with
+            lib/theme.ts. */}
         <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`,
-          }}
+          dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
         />
+      </head>
+      <body>
         {/* If JS is disabled, reveal all scroll-animated content immediately. */}
         <noscript>
           <style>{`[data-reveal]{opacity:1 !important;transform:none !important}`}</style>

@@ -411,8 +411,17 @@ export const quoteSteps: QuoteStep[] = [
   {
     id: "bathrooms",
     question: "How many bathrooms?",
+    helper: "A half bath is a toilet and basin only (no shower or bath).",
     type: "single",
-    options: ["1", "2", "3", "4+"],
+    options: [
+      "1",
+      "1 + half bath",
+      "2",
+      "2 + half bath",
+      "3",
+      "3 + half bath",
+      "4+",
+    ],
   },
   {
     id: "extras",

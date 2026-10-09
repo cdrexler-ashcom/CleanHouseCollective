@@ -1,4 +1,5 @@
 import { CleanIntro } from "@/components/CleanIntro";
+import { FloatingActions } from "@/components/FloatingActions";
 import { QuoteProvider } from "@/components/QuoteProvider";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -65,6 +66,7 @@ export default function Home() {
         </Reveal>
       </main>
       <Footer />
+      <FloatingActions />
     </QuoteProvider>
   );
 }

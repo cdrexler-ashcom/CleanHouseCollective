@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 
 const PASSES = 4;
 // Keep in sync with the timing variables in globals.css (.chc-intro).
-const TOTAL_MS = 3900;
+// Desktop / phone totals (phones run a faster intro, see the media query).
+const TOTAL_MS = 4100;
+const TOTAL_MS_PHONE = 3600;
 
 // A round string-mop head: two rings of strands radiating from the hub. The
 // uneven lengths give the shaggy outline. Lengths are % of the head diameter.
@@ -46,7 +48,9 @@ export function CleanIntro() {
     const reduced = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    const t = window.setTimeout(() => setDone(true), reduced ? 0 : TOTAL_MS);
+    const phone = window.matchMedia?.("(max-width: 640px)").matches;
+    const total = phone ? TOTAL_MS_PHONE : TOTAL_MS;
+    const t = window.setTimeout(() => setDone(true), reduced ? 0 : total);
     return () => window.clearTimeout(t);
   }, []);
 

@@ -21,12 +21,39 @@ export function Navbar() {
   const { open } = useQuote();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [active, setActive] = useState("");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Scroll-spy: highlight the nav link for the section nearest the middle of
+  // the viewport.
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(`#${e.target.id}`);
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    navLinks.forEach((l) => {
+      const el = document.querySelector(l.href);
+      if (el) observer.observe(el);
+    });
+    const onTop = () => {
+      if (window.scrollY < 200) setActive("");
+    };
+    window.addEventListener("scroll", onTop, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onTop);
+    };
   }, []);
 
   return (
@@ -48,7 +75,11 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-charcoal/80 transition-colors hover:text-emerald dark:text-cream/80 dark:hover:text-sage-light"
+              className={`relative text-sm font-medium transition-colors after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:rounded-full after:bg-sage after:transition-transform after:duration-300 hover:text-emerald hover:after:scale-x-100 dark:hover:text-sage-light ${
+                active === link.href
+                  ? "text-emerald after:scale-x-100 dark:text-sage-light"
+                  : "text-charcoal/80 after:scale-x-0 dark:text-cream/80"
+              }`}
             >
               {link.label}
             </a>

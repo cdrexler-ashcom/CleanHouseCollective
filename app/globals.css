@@ -67,7 +67,7 @@
   }
 
   .card {
-    @apply rounded-2xl border border-black/5 bg-white p-8 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg dark:border-white/10 dark:bg-white/5;
+    @apply relative rounded-2xl border border-black/5 bg-white p-8 shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-soft-lg dark:border-white/10 dark:bg-white/5;
   }
 }
 
@@ -253,12 +253,79 @@
   transform: scale(1) rotate(0deg);
 }
 
+/* --- Hero soap bubbles --- */
+.bubble {
+  position: absolute;
+  bottom: -60px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.9) 0 12%, transparent 14%),
+    radial-gradient(circle at 50% 50%, rgba(168, 196, 171, 0.12), rgba(134, 168, 138, 0.28));
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  animation: bubble-rise linear infinite;
+}
+.dark .bubble {
+  border-color: rgba(168, 196, 171, 0.45);
+}
+@keyframes bubble-rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 0.9; }
+  50% { transform: translate3d(var(--sway), -55vh, 0); }
+  90% { opacity: 0.8; }
+  100% { transform: translate3d(calc(var(--sway) * -0.5), -115vh, 0); opacity: 0; }
+}
+
+/* --- Twinkling sparkles --- */
+.sparkle {
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  40%, 60% { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+/* --- Service icon wiggle on card hover --- */
+@keyframes wiggle {
+  0%, 100% { transform: scale(1.1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(-10deg); }
+  75% { transform: scale(1.1) rotate(10deg); }
+}
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+/* --- Card accent line that draws in on hover --- */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, #86a88a, #166a5c, #86a88a);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card:hover::before {
+  transform: scaleX(1);
+}
+
 /* Honour user's motion preference: switch everything off. */
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+  .bubbles,
+  .sparkle {
+    display: none !important;
   }
   .animate-aurora,
   .animate-aurora-slow,
@@ -281,20 +348,24 @@
 
 /* --- First-load "mop" intro (see components/CleanIntro.tsx) --- */
 .chc-intro {
-  --chc-pass: 0.7s; /* duration of the wipe itself */
-  --chc-lead: 0.15s; /* mop travel before it reaches the screen edge */
-  --chc-run: 1s; /* mop total: lead + wipe + lead (exits off-screen) */
+  --chc-pass: 0.6s; /* duration of the wipe itself */
+  --chc-lead: 0.129s; /* mop travel before it reaches the screen edge */
+  --chc-run: 0.857s; /* mop total: lead + wipe + lead (exits off-screen) */
+  --chc-gap: 0.08s; /* breather between one pass leaving and the next entering */
+  /* How far past the screen edge the mop travels so that head AND handle are
+     completely out of sight before the pass ends. */
+  --chc-off: 60vh;
   /* Gentle ease: never drops to zero speed at the ends, so the mop does not
      stall at the screen edge before leaving. */
   --chc-ease: cubic-bezier(0.3, 0.2, 0.7, 0.8);
-  --chc-step: 0.85s; /* delay between the start of each pass */
+  --chc-step: calc(var(--chc-run) + var(--chc-gap)); /* start-to-start */
   --chc-start: 0.15s;
   position: fixed;
   inset: 0;
   z-index: 100;
   overflow: hidden;
   /* Safety net: if JS never unmounts the overlay, hide it when finished. */
-  animation: chc-hide 0s linear 3.85s forwards;
+  animation: chc-hide 0s linear 4.05s forwards;
 }
 .chc-band {
   position: absolute;
@@ -450,16 +521,78 @@
   to { clip-path: inset(0 100% 0 0); }
 }
 @keyframes chc-mop-ltr {
-  0% { left: calc(0% - 600px); animation-timing-function: linear; }
+  0% { left: calc(0% - var(--chc-off)); animation-timing-function: linear; }
   15% { left: 0%; animation-timing-function: var(--chc-ease); }
   85% { left: 100%; animation-timing-function: linear; }
-  100% { left: calc(100% + 600px); }
+  100% { left: calc(100% + var(--chc-off)); }
 }
 @keyframes chc-mop-rtl {
-  0% { left: calc(100% + 600px); animation-timing-function: linear; }
+  0% { left: calc(100% + var(--chc-off)); animation-timing-function: linear; }
   15% { left: 100%; animation-timing-function: var(--chc-ease); }
   85% { left: 0%; animation-timing-function: linear; }
-  100% { left: calc(0% - 600px); }
+  100% { left: calc(0% - var(--chc-off)); }
+}
+/* Phones: a faster intro. The screen is narrow, so the entry/exit legs get a
+   bigger share of the run (25%) which keeps their speed close to the wipe's
+   speed instead of a slow wipe followed by a sudden zip off-screen. */
+@keyframes chc-mop-ltr-m {
+  0% { left: calc(0% - var(--chc-off)); animation-timing-function: linear; }
+  25% { left: 0%; animation-timing-function: var(--chc-ease); }
+  75% { left: 100%; animation-timing-function: linear; }
+  100% { left: calc(100% + var(--chc-off)); }
+}
+@keyframes chc-mop-rtl-m {
+  0% { left: calc(100% + var(--chc-off)); animation-timing-function: linear; }
+  25% { left: 100%; animation-timing-function: var(--chc-ease); }
+  75% { left: 0%; animation-timing-function: linear; }
+  100% { left: calc(0% - var(--chc-off)); }
+}
+@media (max-width: 640px) {
+  .chc-intro {
+    --chc-pass: 0.36s;
+    --chc-lead: 0.18s;
+    --chc-run: 0.72s;
+    --chc-gap: 0.08s;
+    --chc-start: 0.1s;
+    --chc-off: max(110vw, 60vh);
+    animation-delay: 3.55s;
+  }
+  .chc-ltr .chc-mop {
+    animation-name: chc-mop-ltr-m;
+  }
+  .chc-rtl .chc-mop {
+    animation-name: chc-mop-rtl-m;
+  }
+  .chc-handle {
+    animation-duration: 0.2s;
+  }
+}
+
+/* --- Hero entrance, timed to land as the mop reveals the top of the page --- */
+.hero-in {
+  animation-fill-mode: both;
+  animation-delay: 1.1s;
+}
+.hero-in-2 {
+  animation-delay: 1.35s;
+}
+@media (max-width: 640px) {
+  .hero-in {
+    animation-delay: 0.75s;
+  }
+  .hero-in-2 {
+    animation-delay: 0.95s;
+  }
+}
+
+/* iOS Safari zooms the page when a field under 16px is focused; keep form
+   fields at 16px on phones now that pinch-zoom is allowed again. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
 }
 @keyframes chc-droplet {
   0% { opacity: 0; transform: translate(0, 0); }
@@ -478,5 +611,8 @@
 @media (prefers-reduced-motion: reduce) {
   .chc-intro {
     display: none;
+  }
+  .hero-in {
+    animation-delay: 0s !important;
   }
 }

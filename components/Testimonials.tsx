@@ -54,7 +54,9 @@ export function Testimonials() {
       <div className="container-page">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Client Reviews</p>
-          <h2 className="heading-lg mt-3">18 five-star reviews &amp; counting</h2>
+          <h2 className="heading-lg mt-3">
+            {testimonials.length} five-star reviews &amp; counting
+          </h2>
           <div className="mt-4 flex items-center justify-center gap-2">
             <Stars count={5} />
             <span className="text-sm font-medium text-charcoal/60 dark:text-cream/60">

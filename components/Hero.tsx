@@ -3,8 +3,10 @@
 import { useEffect, useRef } from "react";
 import { Icon } from "./Icon";
 import { useQuote } from "./QuoteProvider";
-import { site } from "@/data/site";
+import { site, testimonials } from "@/data/site";
 import { CountUp } from "./CountUp";
+import { Bubbles } from "./Bubbles";
+import { Sparkle } from "./Sparkle";
 
 const trustPoints = [
   { icon: "shield", label: "Fully insured" },
@@ -13,7 +15,7 @@ const trustPoints = [
 ];
 
 const stats = [
-  { end: 18, suffix: "", label: "Five-star reviews" },
+  { end: testimonials.length, suffix: "", label: "Five-star reviews" },
   { end: 30, suffix: "km", label: "Service radius" },
   { end: 100, suffix: "%", label: "Satisfaction focus" },
 ];
@@ -69,6 +71,7 @@ export function Hero() {
         <div className="animate-aurora absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sage/30 blur-3xl" />
         <div className="animate-aurora-slow absolute top-40 -left-32 h-96 w-96 rounded-full bg-emerald/10 blur-3xl" />
         <div className="animate-aurora absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-sage-light/20 blur-3xl" />
+        <Bubbles />
         {/* Smooth fade so the aurora dissolves elegantly into the next section
             instead of being clipped at the section edge. */}
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-cream dark:to-emerald-deep" />
@@ -76,7 +79,7 @@ export function Hero() {
 
       <div className="container-page grid items-center gap-16 lg:grid-cols-2">
         {/* Copy */}
-        <div className="animate-fade-in-up">
+        <div className="hero-in animate-fade-in-up">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald/15 bg-white/70 px-4 py-1.5 text-xs font-semibold text-emerald shadow-soft dark:bg-white/10 dark:text-sage-light">
             <Icon name="mapPin" className="h-4 w-4" />
             {site.contact.serviceArea}
@@ -131,7 +134,7 @@ export function Hero() {
         </div>
 
         {/* Visual - brand logo feature card */}
-        <div className="relative animate-scale-in [perspective:1000px]">
+        <div className="hero-in hero-in-2 relative animate-scale-in [perspective:1000px]">
           <div
             ref={cardRef}
             className="animate-float relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-sage-light/50 via-cream to-sage/30 p-6 shadow-soft-lg transition-transform duration-200 ease-out will-change-transform sm:p-8 dark:from-emerald-light/30 dark:via-emerald-deep dark:to-emerald/20"
@@ -151,6 +154,12 @@ export function Hero() {
             </div>
           </div>
 
+          {/* Twinkling sparkles around the logo card */}
+          <Sparkle className="-top-3 right-8 text-sage" size={26} />
+          <Sparkle className="top-1/3 -left-4 text-sage-dark dark:text-sage-light" size={16} delay={0.9} />
+          <Sparkle className="-right-3 bottom-1/4 text-sage" size={20} delay={1.7} />
+          <Sparkle className="-bottom-2 right-1/3 text-sage-light" size={14} delay={2.4} />
+
           {/* Floating rating card */}
           <div className="absolute -bottom-6 -left-6 hidden rounded-2xl bg-white p-5 shadow-soft-lg sm:block dark:bg-emerald-deep">
             <div className="flex items-center gap-1 text-amber-400">
@@ -161,7 +170,7 @@ export function Hero() {
               ))}
             </div>
             <p className="mt-1 text-sm font-semibold">
-              <CountUp end={18} /> five-star reviews
+              <CountUp end={testimonials.length} /> five-star reviews
             </p>
             <p className="text-xs text-charcoal/60 dark:text-cream/60">
               Trusted by local homes

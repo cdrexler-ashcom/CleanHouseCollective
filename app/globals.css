@@ -354,10 +354,11 @@
 
 /* --- First-load "mop" intro (see components/CleanIntro.tsx) --- */
 .chc-intro {
-  --chc-pass: 0.6s; /* duration of the wipe itself */
-  --chc-lead: 0.129s; /* mop travel before it reaches the screen edge */
-  --chc-run: 0.857s; /* mop total: lead + wipe + lead (exits off-screen) */
-  --chc-gap: 0.08s; /* breather between one pass leaving and the next entering */
+  --n: 2; /* number of passes (bands); phones use 4 */
+  --chc-pass: 0.5s; /* duration of the wipe itself */
+  --chc-lead: 0.11s; /* mop travel before it reaches the screen edge */
+  --chc-run: 0.72s; /* mop total: lead + wipe + lead (exits off-screen) */
+  --chc-gap: 0.05s; /* breather between one pass leaving and the next entering */
   /* How far past the screen edge the mop travels so that head AND handle are
      completely out of sight before the pass ends. */
   --chc-off: 60vh;
@@ -365,13 +366,19 @@
      stall at the screen edge before leaving. */
   --chc-ease: cubic-bezier(0.3, 0.2, 0.7, 0.8);
   --chc-step: calc(var(--chc-run) + var(--chc-gap)); /* start-to-start */
-  --chc-start: 0.15s;
+  --chc-start: 0.1s;
   position: fixed;
   inset: 0;
   z-index: 100;
   overflow: hidden;
   /* Safety net: if JS never unmounts the overlay, hide it when finished. */
-  animation: chc-hide 0s linear 4.05s forwards;
+  animation: chc-hide 0s linear 1.7s forwards;
+}
+/* Desktop runs only two passes; the extra bands are for phones. */
+@media (min-width: 641px) {
+  .chc-band-extra {
+    display: none;
+  }
 }
 .chc-band {
   position: absolute;
@@ -488,7 +495,7 @@
   background: linear-gradient(90deg, #a07f4e, #7a5c30);
   transform-origin: bottom center;
   transform: rotate(-22deg);
-  animation: chc-handle-sway 0.3s ease-in-out var(--chc-delay) 3 alternate both;
+  animation: chc-handle-sway 0.24s ease-in-out var(--chc-delay) 3 alternate both;
 }
 /* Wet sheen left on the freshly cleaned side, behind the strands. */
 .chc-foam {
@@ -555,6 +562,7 @@
 }
 @media (max-width: 640px) {
   .chc-intro {
+    --n: 4;
     --chc-pass: 0.36s;
     --chc-lead: 0.18s;
     --chc-run: 0.72s;
@@ -577,10 +585,10 @@
 /* --- Hero entrance, timed to land as the mop reveals the top of the page --- */
 .hero-in {
   animation-fill-mode: both;
-  animation-delay: 1.1s;
+  animation-delay: 0.55s;
 }
 .hero-in-2 {
-  animation-delay: 1.35s;
+  animation-delay: 0.75s;
 }
 @media (max-width: 640px) {
   .hero-in {

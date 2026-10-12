@@ -57,6 +57,11 @@ export const viewport: Viewport = {
 
 const THEME_SCRIPT = `(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem('theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=null;try{var m=document.cookie.match(/(?:^|; )theme=(dark|light)/);if(m)t=m[1]}catch(e){}}if(!t){try{t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch(e){t='light'}}if(t==='dark')d.classList.add('dark');d.style.colorScheme=t;})();`;
 
+// Holds the intro (and the hero entrance timed to it) until CleanIntro says the
+// page is loaded and hydrated, so the animation never competes with that work.
+// The timeout is a fallback in case hydration never completes.
+const WAIT_SCRIPT = `(function(){var d=document.documentElement;d.classList.add('chc-wait');setTimeout(function(){d.classList.remove('chc-wait')},6000);})();`;
+
 export default function RootLayout({
   children,
 }: {
@@ -78,6 +83,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
         />
+        <script dangerouslySetInnerHTML={{ __html: WAIT_SCRIPT }} />
       </head>
       <body>
         {/* If JS is disabled, reveal all scroll-animated content immediately. */}

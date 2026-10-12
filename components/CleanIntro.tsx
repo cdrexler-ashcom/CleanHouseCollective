@@ -50,8 +50,48 @@ export function CleanIntro() {
     ).matches;
     const phone = window.matchMedia?.("(max-width: 640px)").matches;
     const total = phone ? TOTAL_MS_PHONE : TOTAL_MS;
-    const t = window.setTimeout(() => setDone(true), reduced ? 0 : total);
-    return () => window.clearTimeout(t);
+    const root = document.documentElement;
+
+    if (reduced) {
+      root.classList.remove("chc-wait");
+      setDone(true);
+      return;
+    }
+
+    // Hold the animation (html.chc-wait) until the page, fonts and hydration
+    // have settled, then start it on a clean frame so it does not stutter.
+    let cancelled = false;
+    let timer: number | undefined;
+    const loaded =
+      document.readyState === "complete"
+        ? Promise.resolve()
+        : new Promise<void>((r) =>
+            window.addEventListener("load", () => r(), { once: true })
+          );
+    const ready = Promise.all([loaded, document.fonts?.ready]);
+    const giveUp = new Promise((r) => window.setTimeout(r, 3000));
+    Promise.race([ready, giveUp]).then(() => {
+      if (cancelled) return;
+      const go = () =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            if (cancelled) return;
+            root.classList.remove("chc-wait");
+            timer = window.setTimeout(() => setDone(true), total);
+          })
+        );
+      if ("requestIdleCallback" in window) {
+        (window as any).requestIdleCallback(go, { timeout: 400 });
+      } else {
+        go();
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      root.classList.remove("chc-wait");
+    };
   }, []);
 
   if (done) return null;

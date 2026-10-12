@@ -352,6 +352,15 @@
   }
 }
 
+/* While the page is still loading/hydrating (html.chc-wait, see layout.tsx and
+   CleanIntro.tsx) every intro animation is held at its start, then released
+   together once the browser is idle so nothing stutters. */
+.chc-wait .chc-intro *,
+.chc-wait .chc-intro *::before,
+.chc-wait .hero-in {
+  animation-play-state: paused !important;
+}
+
 /* --- First-load "mop" intro (see components/CleanIntro.tsx) --- */
 .chc-intro {
   --n: 2; /* number of passes (bands) */
@@ -372,7 +381,7 @@
   z-index: 100;
   overflow: hidden;
   /* Safety net: if JS never unmounts the overlay, hide it when finished. */
-  animation: chc-hide 0s linear 1.7s forwards;
+  animation: chc-hide 0s linear 6s forwards;
 }
 .chc-band {
   position: absolute;
@@ -593,7 +602,7 @@
     --chc-gap: 0.08s;
     --chc-start: 0.1s;
     --chc-off: max(110vw, 60vh);
-    animation-delay: 1.65s;
+    animation-delay: 6s;
   }
   .chc-ltr .chc-mop {
     animation-name: chc-mop-ltr-m;

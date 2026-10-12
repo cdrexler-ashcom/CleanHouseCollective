@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-// Phones run all 4 passes; desktop shows only the first 2 (.chc-band-extra).
-const PASSES = 4;
+const PASSES = 2;
 // Keep in sync with the timing variables in globals.css (.chc-intro).
 // Desktop / phone totals (phones run a faster intro, see the media query).
 const TOTAL_MS = 1750;
-const TOTAL_MS_PHONE = 3600;
+const TOTAL_MS_PHONE = 1700;
 
 // A round string-mop head: two rings of strands radiating from the hub. The
 // uneven lengths give the shaggy outline. Lengths are % of the head diameter.
@@ -64,9 +63,7 @@ export function CleanIntro() {
         return (
           <div
             key={i}
-            className={`chc-band ${rtl ? "chc-rtl" : "chc-ltr"}${
-              i >= 2 ? " chc-band-extra" : ""
-            }`}
+            className={`chc-band ${rtl ? "chc-rtl" : "chc-ltr"}`}
             style={{ ["--i" as any]: i }}
           >
             <div className="chc-cover" />

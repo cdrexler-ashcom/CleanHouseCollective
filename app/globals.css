@@ -354,7 +354,7 @@
 
 /* --- First-load "mop" intro (see components/CleanIntro.tsx) --- */
 .chc-intro {
-  --n: 2; /* number of passes (bands); phones use 4 */
+  --n: 2; /* number of passes (bands) */
   --chc-pass: 0.5s; /* duration of the wipe itself */
   --chc-lead: 0.11s; /* mop travel before it reaches the screen edge */
   --chc-run: 0.72s; /* mop total: lead + wipe + lead (exits off-screen) */
@@ -374,12 +374,6 @@
   /* Safety net: if JS never unmounts the overlay, hide it when finished. */
   animation: chc-hide 0s linear 1.7s forwards;
 }
-/* Desktop runs only two passes; the extra bands are for phones. */
-@media (min-width: 641px) {
-  .chc-band-extra {
-    display: none;
-  }
-}
 .chc-band {
   position: absolute;
   left: 0;
@@ -391,6 +385,20 @@
 .chc-cover {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+  will-change: transform;
+  animation: var(--chc-pass) var(--chc-ease)
+    calc(var(--chc-delay) + var(--chc-lead)) both;
+}
+/* The wipe: the clipping box slides off with the mop while the grime layer
+   inside slides the opposite way by the same amount, so the grime itself stays
+   put and is simply uncovered. Both are transforms (compositor-only, no
+   repaint like clip-path). */
+.chc-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  will-change: transform;
   background-color: #e6e1d3;
   background-image:
     radial-gradient(circle at 12% 30%, rgba(120, 96, 60, 0.16) 0 14px, transparent 15px),
@@ -401,7 +409,7 @@
   animation: var(--chc-pass) var(--chc-ease)
     calc(var(--chc-delay) + var(--chc-lead)) both;
 }
-.dark .chc-cover {
+.dark .chc-cover::before {
   background-color: #101a18;
   background-image:
     radial-gradient(circle at 12% 30%, rgba(200, 180, 140, 0.06) 0 14px, transparent 15px),
@@ -412,8 +420,14 @@
 .chc-ltr .chc-cover {
   animation-name: chc-wipe-ltr;
 }
+.chc-ltr .chc-cover::before {
+  animation-name: chc-wipe-ltr-inner;
+}
 .chc-rtl .chc-cover {
   animation-name: chc-wipe-rtl;
+}
+.chc-rtl .chc-cover::before {
+  animation-name: chc-wipe-rtl-inner;
 }
 
 /* The mop enters from the side, rides the leading edge of the wipe (same
@@ -423,8 +437,11 @@
   position: absolute;
   top: 0;
   height: 100%;
+  left: 0;
   z-index: 2;
-  width: 0;
+  width: 100%;
+  pointer-events: none;
+  will-change: transform;
   animation: var(--chc-run) linear var(--chc-delay) both;
 }
 .chc-ltr .chc-mop {
@@ -488,10 +505,10 @@
   position: absolute;
   left: 50%;
   bottom: 50%;
-  width: 7px;
+  width: 6%; /* of the head width, so it scales with the mop */
   height: 90vh;
-  margin-left: -3.5px;
-  border-radius: 3px;
+  margin-left: -3%;
+  border-radius: 999px;
   background: linear-gradient(90deg, #a07f4e, #7a5c30);
   transform-origin: bottom center;
   transform: rotate(-22deg);
@@ -526,50 +543,57 @@
 }
 
 @keyframes chc-wipe-ltr {
-  from { clip-path: inset(0 0 0 0); }
-  to { clip-path: inset(0 0 0 100%); }
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes chc-wipe-ltr-inner {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@keyframes chc-wipe-rtl-inner {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
 }
 @keyframes chc-wipe-rtl {
-  from { clip-path: inset(0 0 0 0); }
-  to { clip-path: inset(0 100% 0 0); }
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
 @keyframes chc-mop-ltr {
-  0% { left: calc(0% - var(--chc-off)); animation-timing-function: linear; }
-  15% { left: 0%; animation-timing-function: var(--chc-ease); }
-  85% { left: 100%; animation-timing-function: linear; }
-  100% { left: calc(100% + var(--chc-off)); }
+  0% { transform: translateX(calc(0% - var(--chc-off))); animation-timing-function: linear; }
+  15% { transform: translateX(0%); animation-timing-function: var(--chc-ease); }
+  85% { transform: translateX(100%); animation-timing-function: linear; }
+  100% { transform: translateX(calc(100% + var(--chc-off))); }
 }
 @keyframes chc-mop-rtl {
-  0% { left: calc(100% + var(--chc-off)); animation-timing-function: linear; }
-  15% { left: 100%; animation-timing-function: var(--chc-ease); }
-  85% { left: 0%; animation-timing-function: linear; }
-  100% { left: calc(0% - var(--chc-off)); }
+  0% { transform: translateX(calc(100% + var(--chc-off))); animation-timing-function: linear; }
+  15% { transform: translateX(100%); animation-timing-function: var(--chc-ease); }
+  85% { transform: translateX(0%); animation-timing-function: linear; }
+  100% { transform: translateX(calc(0% - var(--chc-off))); }
 }
 /* Phones: a faster intro. The screen is narrow, so the entry/exit legs get a
    bigger share of the run (25%) which keeps their speed close to the wipe's
    speed instead of a slow wipe followed by a sudden zip off-screen. */
 @keyframes chc-mop-ltr-m {
-  0% { left: calc(0% - var(--chc-off)); animation-timing-function: linear; }
-  25% { left: 0%; animation-timing-function: var(--chc-ease); }
-  75% { left: 100%; animation-timing-function: linear; }
-  100% { left: calc(100% + var(--chc-off)); }
+  0% { transform: translateX(calc(0% - var(--chc-off))); animation-timing-function: linear; }
+  25% { transform: translateX(0%); animation-timing-function: var(--chc-ease); }
+  75% { transform: translateX(100%); animation-timing-function: linear; }
+  100% { transform: translateX(calc(100% + var(--chc-off))); }
 }
 @keyframes chc-mop-rtl-m {
-  0% { left: calc(100% + var(--chc-off)); animation-timing-function: linear; }
-  25% { left: 100%; animation-timing-function: var(--chc-ease); }
-  75% { left: 0%; animation-timing-function: linear; }
-  100% { left: calc(0% - var(--chc-off)); }
+  0% { transform: translateX(calc(100% + var(--chc-off))); animation-timing-function: linear; }
+  25% { transform: translateX(100%); animation-timing-function: var(--chc-ease); }
+  75% { transform: translateX(0%); animation-timing-function: linear; }
+  100% { transform: translateX(calc(0% - var(--chc-off))); }
 }
 @media (max-width: 640px) {
   .chc-intro {
-    --n: 4;
     --chc-pass: 0.36s;
     --chc-lead: 0.18s;
     --chc-run: 0.72s;
     --chc-gap: 0.08s;
     --chc-start: 0.1s;
     --chc-off: max(110vw, 60vh);
-    animation-delay: 3.55s;
+    animation-delay: 1.65s;
   }
   .chc-ltr .chc-mop {
     animation-name: chc-mop-ltr-m;

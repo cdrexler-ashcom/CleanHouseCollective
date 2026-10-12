@@ -1,4 +1,5 @@
 import { CleanIntro } from "@/components/CleanIntro";
+import { ExitIntent } from "@/components/ExitIntent";
 import { FloatingActions } from "@/components/FloatingActions";
 import { QuoteProvider } from "@/components/QuoteProvider";
 import { Navbar } from "@/components/Navbar";
@@ -67,6 +68,7 @@ export default function Home() {
       </main>
       <Footer />
       <FloatingActions />
+      <ExitIntent />
     </QuoteProvider>
   );
 }

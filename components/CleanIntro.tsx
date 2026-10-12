@@ -69,7 +69,7 @@ export function CleanIntro() {
             window.addEventListener("load", () => r(), { once: true })
           );
     const ready = Promise.all([loaded, document.fonts?.ready]);
-    const giveUp = new Promise((r) => window.setTimeout(r, 3000));
+    const giveUp = new Promise((r) => window.setTimeout(r, 2500));
     Promise.race([ready, giveUp]).then(() => {
       if (cancelled) return;
       const go = () =>

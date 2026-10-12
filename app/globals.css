@@ -355,6 +355,7 @@
 /* While the page is still loading/hydrating (html.chc-wait, see layout.tsx and
    CleanIntro.tsx) every intro animation is held at its start, then released
    together once the browser is idle so nothing stutters. */
+.chc-wait .chc-intro,
 .chc-wait .chc-intro *,
 .chc-wait .chc-intro *::before,
 .chc-wait .hero-in {
@@ -380,8 +381,10 @@
   inset: 0;
   z-index: 100;
   overflow: hidden;
-  /* Safety net: if JS never unmounts the overlay, hide it when finished. */
-  animation: chc-hide 0s linear 6s forwards;
+  /* Safety net: if JS never unmounts the overlay, hide it once the intro has
+     finished. Paused with everything else while html.chc-wait is set, so its
+     clock starts when the mop does, not at first paint. */
+  animation: chc-hide 0s linear 2.5s forwards;
 }
 .chc-band {
   position: absolute;
@@ -602,7 +605,7 @@
     --chc-gap: 0.08s;
     --chc-start: 0.1s;
     --chc-off: max(110vw, 60vh);
-    animation-delay: 6s;
+    animation-delay: 2.5s;
   }
   .chc-ltr .chc-mop {
     animation-name: chc-mop-ltr-m;

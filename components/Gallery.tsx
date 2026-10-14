@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { gallery } from "@/data/site";
 import { Icon } from "./Icon";
 import { useQuote } from "./QuoteProvider";
@@ -74,7 +75,9 @@ function Lightbox({
   const navBtn =
     "flex h-11 w-11 flex-none items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/30";
 
-  return (
+  // Portalled to <body>: the section sits inside a transformed scroll-reveal
+  // wrapper, which would otherwise make `fixed` relative to it, not the screen.
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6"
       role="dialog"
@@ -138,7 +141,8 @@ function Lightbox({
           <Icon name="arrowRight" className="h-4 w-4" />
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

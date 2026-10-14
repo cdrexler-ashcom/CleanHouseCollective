@@ -618,6 +618,22 @@
   }
 }
 
+/* Lite mop for phones and low-power devices (html.chc-lite, set in layout.tsx):
+   one ring of strands, and no drop shadow, foam, droplets or handle sway, so
+   there is far less to rasterise and animate. */
+.chc-lite .chc-strand-back,
+.chc-lite .chc-foam,
+.chc-lite .chc-droplet {
+  display: none;
+}
+.chc-lite .chc-head {
+  filter: none;
+}
+.chc-lite .chc-handle {
+  animation: none;
+  transform: rotate(-22deg);
+}
+
 /* --- Hero entrance, timed to land as the mop reveals the top of the page --- */
 .hero-in {
   animation-fill-mode: both;

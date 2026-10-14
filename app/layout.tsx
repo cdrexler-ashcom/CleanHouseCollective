@@ -59,8 +59,9 @@ const THEME_SCRIPT = `(function(){var d=document.documentElement,t=null;try{t=lo
 
 // Holds the intro (and the hero entrance timed to it) until CleanIntro says the
 // page is loaded and hydrated, so the animation never competes with that work.
-// The timeout is a fallback in case hydration never completes.
-const WAIT_SCRIPT = `(function(){var d=document.documentElement;d.classList.add('chc-wait');setTimeout(function(){d.classList.remove('chc-wait')},6000);})();`;
+// Phones and low-power devices also get `chc-lite`, a simpler mop (see
+// globals.css). The timeout is a fallback in case hydration never completes.
+const WAIT_SCRIPT = `(function(){var d=document.documentElement,n=navigator;d.classList.add('chc-wait');if(innerWidth<=640||n.hardwareConcurrency<=4||n.deviceMemory<=4)d.classList.add('chc-lite');setTimeout(function(){d.classList.remove('chc-wait')},6000);})();`;
 
 export default function RootLayout({
   children,

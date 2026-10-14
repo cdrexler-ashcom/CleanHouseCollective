@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Services } from "@/components/Services";
+import { Gallery } from "@/components/Gallery";
 import { Pricing } from "@/components/Pricing";
 import { ServiceArea } from "@/components/ServiceArea";
 import { Testimonials } from "@/components/Testimonials";
@@ -36,6 +37,12 @@ export default function Home() {
 
         <Reveal>
           <Services />
+        </Reveal>
+
+        <SectionDivider />
+
+        <Reveal>
+          <Gallery />
         </Reveal>
 
         <SectionDivider />

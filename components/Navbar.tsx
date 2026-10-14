@@ -10,6 +10,7 @@ import { site } from "@/data/site";
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "Services", href: "#services" },
+  { label: "Gallery", href: "#gallery" },
   { label: "Pricing", href: "#pricing" },
   { label: "Service Area", href: "#service-area" },
   { label: "Reviews", href: "#testimonials" },
@@ -70,7 +71,7 @@ export function Navbar() {
         </a>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-7 lg:flex">
+        <div className="hidden items-center gap-5 lg:flex xl:gap-7">
           {navLinks.map((link) => (
             <a
               key={link.href}

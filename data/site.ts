@@ -463,3 +463,26 @@ export const photoLimits = {
   maxFiles: 6,
   maxSizeMB: 8,
 };
+
+// Before / after gallery. Images live in public/gallery as NN-before.jpg and
+// NN-after.jpg (900x1125). Listed in display order; edit captions freely.
+export const gallery = [
+  { id: "03", caption: "Bedroom" },
+  { id: "02", caption: "Bathroom" },
+  { id: "01", caption: "Living area" },
+  { id: "10", caption: "Oven" },
+  { id: "18", caption: "Shower" },
+  { id: "17", caption: "Toilet" },
+  { id: "06", caption: "Bathroom basin" },
+  { id: "09", caption: "Oven" },
+  { id: "04", caption: "Open-plan living" },
+  { id: "05", caption: "Bathroom floor" },
+  { id: "07", caption: "Light fitting" },
+  { id: "08", caption: "Ceiling fan" },
+  { id: "11", caption: "Shower" },
+  { id: "12", caption: "Shower" },
+  { id: "13", caption: "Shower" },
+  { id: "14", caption: "Shower" },
+  { id: "15", caption: "Shower" },
+  { id: "16", caption: "Shower" },
+];

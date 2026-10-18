@@ -253,7 +253,7 @@ function estimateText(est: QuoteEstimate): string {
           .map((d) => `* ${d.label}: ${money(d.price)}`)
           .join("\n")
       : "") +
-    `\n\n--- DRAFT REPLY (proofread, then copy and paste) ---\n\n${est.reply}`
+    `\n\n--- DRAFT MESSAGE (proofread, then copy and paste) ---\n\n${est.reply}`
   );
 }
 
@@ -294,7 +294,7 @@ function estimateHtml(est: QuoteEstimate): string {
       </ul>
       ${deepRef}
 
-      <h4 style="margin:16px 0 4px">Draft reply (proofread, then copy and paste)</h4>
+      <h4 style="margin:16px 0 4px">Draft message (proofread, then copy and paste)</h4>
       <div style="padding:12px;background:#fff;border:1px solid #e6e0c8;border-radius:6px;white-space:pre-wrap;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.5">${escapeHtml(est.reply)}</div>
     </div>
   `;

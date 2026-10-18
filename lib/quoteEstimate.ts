@@ -76,7 +76,7 @@ export type QuoteEstimate = {
   showDeepReference: boolean;
   /** Things the business should double check before sending. */
   flags: string[];
-  /** Subject + body of the reply, ready to copy and paste. */
+  /** Plain message (not an email), ready to copy and paste. */
   reply: string;
 };
 
@@ -229,46 +229,34 @@ function buildReply(
 ): string {
   const b = site.booking;
   const firstName = data.name.split(/\s+/)[0] || "there";
-  const TOTAL_LABEL = "Total for your first clean";
   const recurring = Boolean(data.frequency) && !/one-off/i.test(data.frequency);
-  const width = Math.max(TOTAL_LABEL.length, ...est.lines.map((l) => l.label.length));
-  const lineRows = est.lines
-    .map((l) => `  ${l.label.padEnd(width)}   ${money(l.amount)}`)
+  const bullets = est.lines
+    .map((l) => `- ${l.label}: ${money(l.amount)}`)
     .join("\n");
 
   const what = est.isOffice
-    ? "office cleaning"
-    : data.service.replace(/\s*\(.*\)/, "").toLowerCase() || "cleaning";
-  const freq =
-    data.frequency && !/one-off/i.test(data.frequency)
-      ? ` on a ${data.frequency.toLowerCase()} basis`
-      : "";
+    ? "office clean"
+    : data.service.replace(/\s*\(.*\)/, "").toLowerCase() || "clean";
+  const freq = recurring ? ` (${data.frequency.toLowerCase()})` : "";
   const place = data.suburb ? ` in ${data.suburb}` : "";
 
   return (
-    `Subject: Your Clean House Collective quote\n\n` +
-    `Hi ${firstName},\n\n` +
-    `Thanks for getting in touch with Clean House Collective! Based on the details you sent through, here's your flat-rate quote for ${what}${freq}${place}:\n\n` +
-    `${lineRows}\n` +
-    `  ${"-".repeat(width + 3 + 6)}\n` +
-    `  ${TOTAL_LABEL.padEnd(width)}   ${money(est.total)}\n` +
+    `Hi ${firstName}, thanks for getting in touch with Clean House Collective! Here's your flat-rate quote for your ${what}${freq}${place}:\n\n` +
+    `${bullets}\n\n` +
+    `Total for your first clean: ${money(est.total)}\n` +
     (recurring
-      ? `  ${"Each clean after that".padEnd(width)}   ${money(est.total + NEW_CLIENT_DISCOUNT)}\n\n`
-      : `\n`) +
-    `This is a flat rate for the service, not the clock. It includes fuel, insurance, professional equipment, cleaning products and labour, so there's nothing for you to supply.\n\n` +
-    (photoCount === 0 && !est.isOffice
-      ? `If you can, please send through a few current photos of the kitchen and bathroom/s (no need to tidy up!) so we can confirm the price with no surprises on the day.\n\n`
+      ? `Each clean after that: ${money(est.total + NEW_CLIENT_DISCOUNT)}\n`
       : "") +
-    `To lock in your booking, a ${b.deposit} deposit secures your spot:\n` +
-    `  Account name: ${b.bank.accountName}\n` +
-    `  BSB: ${b.bank.bsb}\n` +
-    `  Account number: ${b.bank.accountNumber}\n` +
-    `  Reference: ${b.bank.reference}\n\n` +
-    `Let us know your preferred day and time and we'll get you booked in. Any questions, just reply to this email or call us on ${site.contact.phone}.\n\n` +
-    `Warm regards,\n` +
-    `Clean House Collective\n` +
-    `${site.tagline}\n` +
-    `ABN ${site.abn}\n`
+    `\nThat's a flat rate and includes fuel, insurance, equipment, products and labour, so there's nothing for you to supply.\n\n` +
+    (photoCount === 0 && !est.isOffice
+      ? `If you can, send through a few photos of the kitchen and bathroom/s (no need to tidy!) so we can confirm the price.\n\n`
+      : "") +
+    `A ${b.deposit} deposit secures your booking:\n` +
+    `- Account name: ${b.bank.accountName}\n` +
+    `- BSB: ${b.bank.bsb}\n` +
+    `- Account number: ${b.bank.accountNumber}\n` +
+    `- Reference: ${b.bank.reference}\n\n` +
+    `Let us know what day and time suits and we'll get you booked in!`
   );
 }
 

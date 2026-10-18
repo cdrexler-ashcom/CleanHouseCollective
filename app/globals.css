@@ -605,7 +605,7 @@
     --chc-gap: 0.08s;
     --chc-start: 0.1s;
     --chc-off: max(110vw, 60vh);
-    animation-delay: 2.5s;
+    animation-delay: 4s; /* CSS safety net, after the JS fallback */
   }
   .chc-ltr .chc-mop {
     animation-name: chc-mop-ltr-m;
@@ -628,6 +628,18 @@
 }
 .chc-lite .chc-head {
   filter: none;
+}
+/* Flat grime: a plain sliding colour block, with no second layer counter-
+   animating a gradient pattern (half the animated layers, no big gradient
+   rasterisation). */
+.chc-lite .chc-cover::before {
+  display: none;
+}
+.chc-lite .chc-cover {
+  background-color: #e6e1d3;
+}
+.dark.chc-lite .chc-cover {
+  background-color: #101a18;
 }
 .chc-lite .chc-handle {
   animation: none;

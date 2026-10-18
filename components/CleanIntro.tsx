@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const PASSES = 2;
 // Keep in sync with the timing variables in globals.css (.chc-intro).
-// Desktop / phone totals (phones run a faster intro, see the media query).
 const TOTAL_MS = 1750;
-const TOTAL_MS_PHONE = 1700;
+// Phones remove the overlay when the last mop animation ends. This is only the
+// fallback in case that event never fires (e.g. a backgrounded tab).
+const PHONE_FALLBACK_MS = 3500;
 
 // A round string-mop head: two rings of strands radiating from the hub. The
 // uneven lengths give the shaggy outline. Lengths are % of the head diameter.
@@ -43,20 +44,34 @@ const DROPLETS = [
  */
 export function CleanIntro() {
   const [done, setDone] = useState(false);
+  const phoneRef = useRef(false);
 
   useEffect(() => {
     const reduced = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     ).matches;
     const phone = window.matchMedia?.("(max-width: 640px)").matches;
-    const total = phone ? TOTAL_MS_PHONE : TOTAL_MS;
     const root = document.documentElement;
+    phoneRef.current = Boolean(phone);
 
     if (reduced) {
       root.classList.remove("chc-wait");
       setDone(true);
       return;
     }
+
+    // Phones: no waiting. The CSS animation starts at first paint (layout.tsx
+    // does not set chc-wait for them), so the mop is the first thing visible
+    // and runs on the compositor while the page hydrates. The overlay is
+    // removed by the mop's animationend (below), not by a timer that could
+    // expire before a busy phone has drawn a single frame.
+    if (phone) {
+      root.classList.remove("chc-wait");
+      const t = window.setTimeout(() => setDone(true), PHONE_FALLBACK_MS);
+      return () => window.clearTimeout(t);
+    }
+
+    const total = TOTAL_MS;
 
     // Hold the animation (html.chc-wait) until the page, fonts and hydration
     // have settled, then start it on a clean frame so it does not stutter.
@@ -100,9 +115,21 @@ export function CleanIntro() {
     <div className="chc-intro" aria-hidden="true">
       {Array.from({ length: PASSES }, (_, i) => {
         const rtl = i % 2 === 1;
+        const last = i === PASSES - 1;
         return (
           <div
             key={i}
+            onAnimationEnd={
+              last
+                ? (e) => {
+                    if (
+                      phoneRef.current &&
+                      (e.target as HTMLElement).classList.contains("chc-mop")
+                    )
+                      setDone(true);
+                  }
+                : undefined
+            }
             className={`chc-band ${rtl ? "chc-rtl" : "chc-ltr"}`}
             style={{ ["--i" as any]: i }}
           >

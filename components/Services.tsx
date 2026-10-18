@@ -15,12 +15,13 @@ export function Services() {
           <h2 className="heading-lg mt-3">Cleaning tailored to your home</h2>
           <p className="mt-5 text-lg text-charcoal/70 dark:text-cream/70">
             We specialise in ongoing home cleaning, with weekly, fortnightly and
-            monthly services available, as well as one-off cleans.
+            monthly services available, as well as one-off cleans, plus
+            office and business cleaning.
           </p>
         </div>
 
         {/* Service cards */}
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {services.map((service) => (
             <div
               key={service.title}

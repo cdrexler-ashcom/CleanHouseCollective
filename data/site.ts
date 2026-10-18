@@ -13,7 +13,7 @@ export const site = {
   name: "Clean House Collective",
   tagline: "Come home to fresh, without the fuss.",
   description:
-    "Regular domestic house cleaning based in Kallangur, servicing homes within approximately a 30 km radius across North Brisbane & Moreton Bay. Simple, all-inclusive flat-rate pricing.",
+    "Regular domestic house cleaning and office cleaning based in Kallangur, servicing homes and businesses within approximately a 30 km radius across North Brisbane & Moreton Bay. Simple, all-inclusive flat-rate pricing.",
 
   // ---- Business / legal details ----
   abn: "48 701 813 578", // ABN 48701813578, formatted XX XXX XXX XXX
@@ -75,7 +75,7 @@ export const services: Service[] = [
     tagline: "Regular maintenance cleaning",
     description:
       "Our signature ongoing clean for homes that need regular maintenance. Available weekly, fortnightly or monthly, as well as one-off cleans. A flat-rate price for the service, not the clock.",
-    price: "From $120 per clean",
+    price: "From $160 per clean",
     icon: "sparkles",
     featured: true,
   },
@@ -95,12 +95,21 @@ export const services: Service[] = [
     price: "Quoted per task",
     icon: "heart",
   },
+  {
+    title: "Office Cleaning",
+    tagline: "Fresh workspaces, without the fuss",
+    description:
+      "Regular or one-off cleaning for offices and small business spaces. Flexible scheduling to suit your hours, with the same all-inclusive flat rate. Quoted to the size of your space.",
+    price: "Personalised quote",
+    icon: "building",
+  },
 ];
 
 // Standard Refresh pricing tiers (from the company flat-rate document)
 export const pricing = [
-  { label: "1 Bathroom Home", price: "$120", unit: "per clean" },
-  { label: "2 Bathroom Home", price: "$150", unit: "per clean" },
+  { label: "1 Bathroom Home", price: "$160", unit: "per clean" },
+  { label: "2 Bathroom Home", price: "$200", unit: "per clean" },
+  { label: "2 Bathrooms + Half Bath", price: "$240", unit: "per clean" },
 ];
 
 // What's included in a Standard Refresh
@@ -375,6 +384,8 @@ export type QuoteStep = {
   helper?: string;
   type: "single" | "multi" | "text" | "photos" | "contact";
   options?: string[];
+  /** Skip this step when the customer asks for office cleaning. */
+  homeOnly?: boolean;
 };
 
 /**
@@ -393,6 +404,7 @@ export const quoteSteps: QuoteStep[] = [
       "Standard Refresh (regular)",
       "One-Off Clean",
       "Deep Refresh",
+      "Office / Business Cleaning",
       "Not sure yet",
     ],
   },
@@ -406,6 +418,7 @@ export const quoteSteps: QuoteStep[] = [
     id: "bedrooms",
     question: "How many bedrooms?",
     type: "single",
+    homeOnly: true,
     options: ["1", "2", "3", "4", "5+"],
   },
   {
@@ -413,6 +426,7 @@ export const quoteSteps: QuoteStep[] = [
     question: "How many bathrooms?",
     helper: "A half bath is a toilet and basin only (no shower or bath).",
     type: "single",
+    homeOnly: true,
     options: [
       "1",
       "1 + half bath",
@@ -428,6 +442,7 @@ export const quoteSteps: QuoteStep[] = [
     question: "Any optional extras?",
     helper: "Select as many as you like, or none. You can add more detail in the notes.",
     type: "multi",
+    homeOnly: true,
     options: optionalExtras,
   },
   {

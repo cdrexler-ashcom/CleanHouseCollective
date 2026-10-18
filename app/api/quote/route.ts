@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { site } from "@/data/site";
+import {
+  deepCleanReference,
+  estimateQuote,
+  money,
+  type QuoteEstimate,
+} from "@/lib/quoteEstimate";
 
 /**
  * Quote request email endpoint - powered by Resend.
@@ -113,6 +119,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Internal-only draft price + reply. Goes into the business email below
+    // and is never included in anything sent to the customer.
+    const estimate = estimateQuote(data, attachments.length);
+
     // 1) Notify the business (with photos attached).
     const businessRes = await sendEmail(apiKey, {
       from,
@@ -120,9 +130,9 @@ export async function POST(req: NextRequest) {
       reply_to: data.email, // replying goes straight to the customer
       subject: `New Quote Request - ${data.service || "Cleaning"} (${
         data.suburb || "SEQ"
-      })`,
-      text: businessText(data, attachments.length),
-      html: businessHtml(data, attachments.length),
+      }) - est. ${money(estimate.total)}`,
+      text: businessText(data, attachments.length, estimate),
+      html: businessHtml(data, attachments.length, estimate),
       attachments,
     });
 
@@ -230,7 +240,71 @@ function summaryPairsHtml(rows: [string, string][]): string {
     .join("");
 }
 
-function businessText(data: QuoteData, photoCount: number): string {
+function estimateText(est: QuoteEstimate): string {
+  return (
+    `\n--- INTERNAL QUOTE ESTIMATE (not sent to the customer) ---\n` +
+    est.lines.map((l) => `${l.label}: ${money(l.amount)}`).join("\n") +
+    `\nEstimated total: ${money(est.total)} (about ${est.hours} hours at the base rate)\n\n` +
+    `Check before sending:\n` +
+    est.flags.map((f) => `* ${f}`).join("\n") +
+    (est.showDeepReference
+      ? `\n\nDeep clean add-ons:\n` +
+        deepCleanReference()
+          .map((d) => `* ${d.label}: ${money(d.price)}`)
+          .join("\n")
+      : "") +
+    `\n\n--- DRAFT REPLY (proofread, then copy and paste) ---\n\n${est.reply}`
+  );
+}
+
+function estimateHtml(est: QuoteEstimate): string {
+  const rows = est.lines
+    .map(
+      (l) =>
+        `<tr>
+           <td style="padding:5px 10px;border-bottom:1px solid #e6e0c8">${escapeHtml(l.label)}</td>
+           <td style="padding:5px 10px;border-bottom:1px solid #e6e0c8;text-align:right">${money(l.amount)}</td>
+         </tr>`
+    )
+    .join("");
+  const deepRef = est.showDeepReference
+    ? `<h4 style="margin:16px 0 4px">Deep clean add-ons</h4>
+       <ul style="margin:0;padding-left:20px;line-height:1.5">
+         ${deepCleanReference()
+           .map((d) => `<li>${escapeHtml(d.label)}: ${money(d.price)}</li>`)
+           .join("")}
+       </ul>`
+    : "";
+  return `
+    <div style="margin:28px 0 0;padding:16px;border:2px dashed #C9A227;border-radius:10px;background:#FFFBEA">
+      <h3 style="color:#8A6D00;margin:0 0 2px">Internal quote estimate</h3>
+      <p style="margin:0 0 12px;color:#8A6D00;font-size:12px">For the business only. The customer has not seen this.</p>
+      <table style="border-collapse:collapse;width:100%">
+        ${rows}
+        <tr>
+          <td style="padding:8px 10px;font-weight:bold">Estimated total</td>
+          <td style="padding:8px 10px;font-weight:bold;text-align:right">${money(est.total)}</td>
+        </tr>
+      </table>
+      <p style="margin:4px 10px 0;color:#6B8C6F;font-size:12px">About ${est.hours} hours at the base rate.</p>
+
+      <h4 style="margin:16px 0 4px">Check before sending</h4>
+      <ul style="margin:0;padding-left:20px;line-height:1.5">
+        ${est.flags.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
+      </ul>
+      ${deepRef}
+
+      <h4 style="margin:16px 0 4px">Draft reply (proofread, then copy and paste)</h4>
+      <div style="padding:12px;background:#fff;border:1px solid #e6e0c8;border-radius:6px;white-space:pre-wrap;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.5">${escapeHtml(est.reply)}</div>
+    </div>
+  `;
+}
+
+function businessText(
+  data: QuoteData,
+  photoCount: number,
+  est: QuoteEstimate
+): string {
   const rows: [string, string][] = [
     ["Service", data.service],
     ["Frequency", data.frequency],
@@ -248,11 +322,16 @@ function businessText(data: QuoteData, photoCount: number): string {
     `Name:  ${data.name}\n` +
     `Email: ${data.email}\n` +
     `Phone: ${data.phone}\n\n` +
-    `Photos attached: ${photoCount}\n`
+    `Photos attached: ${photoCount}\n` +
+    estimateText(est)
   );
 }
 
-function businessHtml(data: QuoteData, photoCount: number): string {
+function businessHtml(
+  data: QuoteData,
+  photoCount: number,
+  est: QuoteEstimate
+): string {
   const rows: [string, string][] = [
     ["Service", data.service],
     ["Frequency", data.frequency],
@@ -276,6 +355,7 @@ function businessHtml(data: QuoteData, photoCount: number): string {
         <a href="tel:${escapeHtml(data.phone)}">${escapeHtml(data.phone)}</a>
       </p>
       <p style="margin:16px 0 0;color:#6B8C6F">Photos attached: ${photoCount}</p>
+      ${estimateHtml(est)}
     </div>
   `;
 }

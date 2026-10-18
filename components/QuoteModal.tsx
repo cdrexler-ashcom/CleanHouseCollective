@@ -57,8 +57,13 @@ export function QuoteModal({
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const step = quoteSteps[stepIndex];
-  const totalSteps = quoteSteps.length;
+  const isOffice = /office|business/i.test(answers.service || "");
+  const steps = useMemo(
+    () => quoteSteps.filter((s) => !(isOffice && s.homeOnly)),
+    [isOffice]
+  );
+  const step = steps[stepIndex];
+  const totalSteps = steps.length;
   const progress = Math.round(((stepIndex + 1) / totalSteps) * 100);
 
   const contactErrors = useMemo(() => validateContact(contact), [contact]);
@@ -140,9 +145,13 @@ export function QuoteModal({
     const rows: [string, string][] = [
       ["Service", answers.service || "-"],
       ["Frequency", answers.frequency || "-"],
-      ["Bedrooms", answers.bedrooms || "-"],
-      ["Bathrooms", answers.bathrooms || "-"],
-      ["Optional extras", extrasValue()],
+      ...(isOffice
+        ? []
+        : ([
+            ["Bedrooms", answers.bedrooms || "-"],
+            ["Bathrooms", answers.bathrooms || "-"],
+            ["Optional extras", extrasValue()],
+          ] as [string, string][])),
       ["Suburb", answers.suburb || "-"],
       ["Notes", answers.notes || "-"],
     ];
@@ -164,9 +173,9 @@ export function QuoteModal({
     const form = new FormData();
     form.append("service", answers.service || "");
     form.append("frequency", answers.frequency || "");
-    form.append("bedrooms", answers.bedrooms || "");
-    form.append("bathrooms", answers.bathrooms || "");
-    form.append("extras", extrasValue());
+    form.append("bedrooms", isOffice ? "" : answers.bedrooms || "");
+    form.append("bathrooms", isOffice ? "" : answers.bathrooms || "");
+    form.append("extras", isOffice ? "None" : extrasValue());
     form.append("suburb", answers.suburb || "");
     form.append("notes", answers.notes || "");
     form.append("name", contact.name);
@@ -230,7 +239,7 @@ export function QuoteModal({
           <div>
             <p className="eyebrow">Free Quote</p>
             <h3 className="font-display text-xl font-bold">
-              {done ? "Request sent!" : "Tell us about your home"}
+              {done ? "Request sent!" : "Tell us about your space"}
             </h3>
           </div>
           <button

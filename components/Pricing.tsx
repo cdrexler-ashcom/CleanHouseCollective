@@ -40,7 +40,7 @@ export function Pricing() {
         </div>
 
         {/* Standard Refresh starting prices */}
-        <div className="mx-auto mt-12 grid max-w-3xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
           {pricing.map((tier) => (
             <div
               key={tier.label}

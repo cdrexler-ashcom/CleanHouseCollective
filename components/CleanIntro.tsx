@@ -6,8 +6,13 @@ const PASSES = 2;
 // Keep in sync with the timing variables in globals.css (.chc-intro).
 const TOTAL_MS = 1750;
 // Phones remove the overlay when the last mop animation ends. This is only the
-// fallback in case that event never fires (e.g. a backgrounded tab).
+// fallback (counted from when the animation is released) in case that event
+// never fires.
 const PHONE_FALLBACK_MS = 3500;
+// Phones wait until the page is actually visible, then this long for the
+// browser to finish its own transition (opening from Google, in-app views and
+// tab switches animate in while the page is already "visible").
+const PHONE_SETTLE_MS = 450;
 
 // A round string-mop head: two rings of strands radiating from the hub. The
 // uneven lengths give the shaggy outline. Lengths are % of the head diameter.
@@ -60,15 +65,45 @@ export function CleanIntro() {
       return;
     }
 
-    // Phones: no waiting. The CSS animation starts at first paint (layout.tsx
-    // does not set chc-wait for them), so the mop is the first thing visible
-    // and runs on the compositor while the page hydrates. The overlay is
-    // removed by the mop's animationend (below), not by a timer that could
-    // expire before a busy phone has drawn a single frame.
+    // Phones: do not wait for load, fonts or idle, but do not start until the
+    // page is really on screen. Opening the site from Google (or an in-app
+    // browser) loads it while the browser is still transitioning to the tab,
+    // and the time-based animation would otherwise be mostly over by the time
+    // it is visible. The solid cover shows meanwhile. The overlay is removed by
+    // the mop's animationend (below), with a timer only as a fallback.
     if (phone) {
-      root.classList.remove("chc-wait");
-      const t = window.setTimeout(() => setDone(true), PHONE_FALLBACK_MS);
-      return () => window.clearTimeout(t);
+      let released = false;
+      let settle: number | undefined;
+      let fallback: number | undefined;
+      const release = () => {
+        if (released) return;
+        released = true;
+        document.removeEventListener("visibilitychange", check);
+        document.removeEventListener("prerenderingchange", check);
+        root.classList.remove("chc-wait");
+        fallback = window.setTimeout(() => setDone(true), PHONE_FALLBACK_MS);
+      };
+      const check = () => {
+        const doc = document as Document & { prerendering?: boolean };
+        if (document.visibilityState !== "visible" || doc.prerendering) return;
+        window.clearTimeout(settle);
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            settle = window.setTimeout(release, PHONE_SETTLE_MS);
+          })
+        );
+      };
+      document.addEventListener("visibilitychange", check);
+      document.addEventListener("prerenderingchange", check);
+      check();
+      return () => {
+        released = true;
+        document.removeEventListener("visibilitychange", check);
+        document.removeEventListener("prerenderingchange", check);
+        window.clearTimeout(settle);
+        window.clearTimeout(fallback);
+        root.classList.remove("chc-wait");
+      };
     }
 
     const total = TOTAL_MS;
